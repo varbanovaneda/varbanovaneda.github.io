@@ -1,10 +1,19 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    CONTENT — edit this file to update the portfolio.
    Everything on the site is rendered from SITE, SERIES and PROJECTS below.
    ========================================================================== */
 (function () {
-  /* Image helper — keeps the real proportions so artwork is never cropped. */
-  const img = (file, width, height, alt) => ({ src: `assets/work/${file}`, width, height, alt });
+  /* Image helper — keeps the real proportions so artwork is never cropped.
+     Smaller copies live in assets/work/opt/<name>-<width>.jpg (only widths at least
+     100px narrower than the original); the browser picks the smallest one that is
+     still sharp for the space it fills. */
+  const VARIANTS = [480, 640, 800, 1000, 1200, 1400];
+  const img = (file, width, height, alt) => {
+    const src = `assets/work/${file}`;
+    const base = file.replace(/\.[^.]+$/, "");
+    const set = VARIANTS.filter((w) => w <= width - 100).map((w) => `assets/work/opt/${base}-${w}.jpg ${w}w`);
+    return { src, width, height, alt, srcset: set.length ? [...set, `${src} ${width}w`].join(", ") : undefined };
+  };
 
   window.SITE = {
     name: "Neda Varbanova",
@@ -171,7 +180,7 @@
       summary: "Ten seasons in love with the mountains.",
       cover: img("divite-kozleta.jpg", 1336, 1280, "Three cartoon goats with backpacks in front of pine trees, with the text Divite kozleta, 10 seasons in love with the mountains"),
     },
-    { slug: "wild-goats-logo", series: "puldin", span: 6, lang: "bg", title: "Дивите козлета", category: "Logo", cover: img("wild-goats.png", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape") },
+    { slug: "wild-goats-logo", series: "puldin", span: 6, lang: "bg", title: "Дивите козлета", category: "Logo", cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape") },
 
     /* 05 Red Beard Studio — Robin Identity */
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },

@@ -101,18 +101,8 @@
   }
   function footerHTML() {
     const S = window.SITE;
-    const insta = S.socials.find((s) => /instagram/i.test(s.label)) || S.socials[0];
     return `
       <footer class="footer hand-footer">
-        <div class="hf-sign-wrap" data-write-group data-write-speed="0.04">
-          <p class="hf-note label" data-write>Thanks for looking</p>
-          <p class="hf-sign display" data-write data-write-speed="0.06">${esc(S.name)}</p>
-        </div>
-        <ul class="hf-links" aria-label="Contact" data-write-group data-write-speed="0.03" data-write-delay="0.2">
-          <li><a class="hand-link" href="mailto:${esc(S.email)}" data-write>${esc(S.email)}</a></li>
-          ${S.phone ? `<li><a class="hand-link" href="${esc(S.phone.href)}" data-write>${esc(S.phone.label)}</a></li>` : ""}
-          ${insta ? `<li><a class="hand-link" href="${esc(insta.url)}" target="_blank" rel="noopener noreferrer" data-write>${esc(insta.handle || insta.label)}</a></li>` : ""}
-        </ul>
         <div class="hf-bottom">
           <p class="footer-copy">© ${new Date().getFullYear()} ${esc(S.name)}. All rights reserved.</p>
           <a class="footer-link footer-top" href="#top">${roll("Back to top ↑")}</a>

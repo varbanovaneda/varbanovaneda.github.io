@@ -39,7 +39,10 @@
   function cardHTML(p) {
     const i = P.indexOf(p);
     const span = Math.min(12, Math.max(3, +p.span || 6));
-    const sizes = span >= 8 ? "(max-width: 640px) 100vw, 70vw" : span >= 6 ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 900px) 50vw, 34vw";
+    // matches the real card width: 1 column ≤640px, 6-col grid ≤900px, 12-col grid above
+    const alone = P.filter((x) => x.series === p.series).length === 1;
+    const tablet = span >= 12 ? 100 : alone ? 67 : 50;
+    const sizes = `(max-width: 640px) 100vw, (max-width: 900px) ${tablet}vw, ${Math.min(100, span * 8)}vw`;
     // deterministic, organic origin for the watercolour bloom
     const ox = 25 + ((i * 37) % 50), oy = 20 + ((i * 53) % 55);
     const start = p.start ? `--start:${+p.start};` : "";
