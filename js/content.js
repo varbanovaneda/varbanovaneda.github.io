@@ -36,7 +36,7 @@
 
     about: {
       intro:
-        "I am a multidisciplinary artist who enjoys experimenting with different mediums, materials and techniques, both traditional and digital.",
+        "Inspired by nature, music, people, and the experiences that shape me, I weave fragments of my life into every piece of art I create.",
       paragraphs: [
         "My practice often combines these approaches through mixed media, photography, collage and illustration.",
         "Inspired by nature, personal experiences and everyday moments, I use art as a way to explore and express my inner world. I am drawn to experimentation, discovering new ways of working and translating emotions and observations into visual forms.",

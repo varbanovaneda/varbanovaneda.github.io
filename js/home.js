@@ -66,7 +66,7 @@
       if (!works.length) return "";
       const [lede, ...rest] = s.text || [];
       return `
-        <section class="series" id="series-${esc(s.id)}" data-medium="${esc(s.reveal || "wash")}" aria-labelledby="series-title-${n}">
+        <section class="series" id="series-${esc(s.id)}" data-medium="${esc(s.reveal || "wash")}"${s.accent ? ` style="--accent:${esc(s.accent)}"` : ""} aria-labelledby="series-title-${n}">
           <header class="series-head" data-reveal>
             <span class="series-num display">${pad(n + 1)}</span>
             <div class="series-heading">

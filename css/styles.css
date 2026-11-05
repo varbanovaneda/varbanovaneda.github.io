@@ -37,6 +37,8 @@ body {
   transition: background-color 0.9s var(--ease-in-out), color 0.9s var(--ease-in-out);
 }
 body[data-tone="light"] { --bg: var(--white); --fg: var(--black); }
+/* while the scroll drives the light/dark blend, follow it closely */
+body.tone-blend { transition: background-color 0.45s cubic-bezier(0.2, 0.6, 0.3, 1), color 0.45s cubic-bezier(0.2, 0.6, 0.3, 1); }
 
 [hidden] { display: none !important; }
 img, video, iframe { display: block; max-width: 100%; }
@@ -286,7 +288,7 @@ html:not(.has-cursor) .card-cta {
   .card:hover .card-media img { transform: scale(1.045); }
   .card:hover .card-arrow { opacity: 1; transform: none; }
   .card-media, .card-meta { transition-property: transform, opacity, clip-path; }
-  .gallery:has(.card:hover) .card:not(:hover) :is(.card-media, .card-meta) { opacity: 0.35; }
+  .gallery:has(.card:hover) .card:not(:hover) :is(.card-media, .card-meta) { opacity: 0.72; }
   .gallery .card :is(.card-media, .card-meta) { transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), clip-path 1.4s var(--ease-out); }
 }
 
@@ -418,16 +420,19 @@ html:not(.has-cursor) .card-cta {
 .footer-link:active { opacity: 0.6; }
 
 /* ---------- Cursor bubble ------------------------------------------------- */
+/* A white, see-through line-drawn brush; its bristle tip is the pointer.
+   A soft shadow keeps the white readable over light paper and artwork. */
 .cursor {
   position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none;
-  width: 108px; height: 108px; border-radius: 50%;
-  display: grid; place-items: center; text-align: center;
-  background: var(--fg); color: var(--bg);
-  font: 600 0.6875rem/1.1 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase;
-  transform: scale(0); will-change: transform;
-  transition: background-color 0.9s var(--ease-in-out), color 0.9s var(--ease-in-out);
+  display: flex; align-items: flex-end; gap: 4px;
+  color: #fff; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+  font: 600 0.6875rem/1.1 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+  transform: scale(0); transform-origin: 14.72px 60.16px; will-change: transform;
 }
-.cursor-label { max-width: 70%; }
+.cursor-brush { width: 64px; height: 64px; flex: none; overflow: visible; }
+.cursor-brush path { fill: none; stroke: currentColor; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.cursor-label { margin: 0 0 6px -8px; }
+.has-cursor [data-cursor], .has-cursor [data-cursor] * { cursor: none; }
 
 /* ==========================================================================
    Project page
@@ -544,7 +549,12 @@ img.is-error { visibility: hidden; }
   :root { --row-gap: 56px; }
   .nav-links { gap: 18px; }
   .nav-link { font-size: 0.75rem; }
-  .hero { padding-top: 96px; min-height: 86svh; }
+  /* Phone: the name sits right under the nav at full width, the intro follows,
+     and the paint gets the open space above the foot line */
+  .hero { padding-top: 92px; min-height: 76svh; justify-content: flex-start; }
+  .hero-title { order: -1; font-size: 19.6vw; }
+  .hero-top { margin: clamp(20px, 6vw, 32px) 0 0; }
+  .hero-foot { margin-top: auto; }
   .hero-top { display: flex; flex-direction: column; gap: 20px; }
   .hero-status { align-self: flex-start; }
   .hero-foot { grid-template-columns: 1fr auto; }
@@ -831,6 +841,6 @@ img.is-error { visibility: hidden; }
   .js [data-write-group] [data-draw] path { stroke-dashoffset: 0 !important; animation: none !important; }
   .js [data-medium] .card-frame { -webkit-mask-image: none !important; mask-image: none !important; }
   .js [data-medium] .card-frame img { filter: none !important; animation: none !important; }
-  .js [data-medium] .card-media::after { display: none; }
+  .js [data-medium] .card-media::before, .js [data-medium] .card-media::after { display: none; }
   .paint-hint::before { animation: none; }
 }

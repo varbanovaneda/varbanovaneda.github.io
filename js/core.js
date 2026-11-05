@@ -307,7 +307,7 @@
   /* Sections declare data-tone="light|dark"; the page background eases
      between them as each section crosses the middle of the viewport. */
   function initTones() {
-    const sections = $$("[data-tone]");
+    const sections = $$("[data-tone]").filter((s) => s !== document.body);
     if (!sections.length) return;
     const links = $$(".nav-link[data-section]");
     const io = new IntersectionObserver((entries) => {
@@ -319,6 +319,44 @@
       });
     }, { rootMargin: "-50% 0px -50% 0px" });
     sections.forEach((s) => io.observe(s));
+
+    /* Scroll-linked fade: every light/dark boundary gets a long, eased fade
+       zone (up to ~1.8 screens of scrolling), capped at half of each
+       neighbouring section so every section still reaches its true colour. */
+    if (reduceMotion.matches) return;
+    // top-level sections only (the <body> carries data-tone too: skip it)
+    const top = sections.filter((s) => s !== document.body && !s.parentElement.closest("main [data-tone]"));
+    if (!top.length) return;
+    const body = document.body;
+    let ticking = false, last = -1;
+    const smooth = (t) => t * t * t * (t * (t * 6 - 15) + 10);               // smootherstep
+    const update = () => {
+      ticking = false;
+      const vh = innerHeight, mid = vh / 2;
+      const rects = top.map((s) => [s.getBoundingClientRect(), s.dataset.tone === "light" ? 1 : 0]);
+      // tone of the section under the middle of the screen (gaps/footer: the one above)
+      let light = rects[0][1];
+      for (const [r, t] of rects) if (r.top <= mid) light = t;
+      for (let i = 0; i < rects.length - 1; i++) {
+        const [a, ta] = rects[i], [b, tb] = rects[i + 1];
+        if (ta === tb) continue;
+        const y = b.top;                                                       // the boundary
+        const h = Math.min(vh * 0.9, a.height * 0.5, b.height * 0.5);          // half-width of the fade
+        if (Math.abs(mid - y) < h) { light = ta + (tb - ta) * smooth((mid - y + h) / (2 * h)); break; }
+      }
+      const pct = Math.round(light * 1000) / 10;
+      if (pct === last) return;
+      last = pct;
+      // the text turns over a little quicker than the page, so it never sinks into it
+      const ink = Math.round(smooth(Math.min(1, Math.max(0, (light - 0.42) / 0.16))) * 1000) / 10;
+      body.classList.add("tone-blend");
+      body.style.setProperty("--bg", `color-mix(in oklab, var(--white) ${pct}%, var(--black))`);
+      body.style.setProperty("--fg", `color-mix(in oklab, var(--black) ${ink}%, var(--white))`);
+    };
+    const req = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+    addEventListener("scroll", req, { passive: true });
+    addEventListener("resize", req);
+    update();
   }
 
   /* Elements with data-drift slide horizontally as they scroll through view. */
@@ -348,7 +386,15 @@
     const el = document.createElement("div");
     el.className = "cursor";
     el.setAttribute("aria-hidden", "true");
-    el.innerHTML = '<span class="cursor-label"></span>';
+    // Line-drawn paintbrush, bristle tip at (23,94) of the 100×100 drawing.
+    el.innerHTML = `<svg class="cursor-brush" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M57 53 C 68 42, 80 26, 86 14 C 88 10, 84 7, 80 10 C 70 18, 58 34, 50 47"/>
+      <path d="M51 43 C 55 43, 60 48, 60 52"/>
+      <path d="M53.5 47 L 55.5 50.5"/>
+      <path d="M50 47 L 41 59 M57 53 L 44 62"/>
+      <path d="M41 59 C 30 64, 22 74, 22 84 C 22 88, 22 92, 23 94 C 28 86, 36 80, 42 74 C 46 70, 46 64, 44 62 Z"/>
+      <path d="M39 64 C 35 68, 32 74, 31 79 M43 65 C 41 70, 40 73, 38 76"/>
+    </svg><span class="cursor-label"></span>`;
     document.body.append(el);
     const label = $(".cursor-label", el);
     const x = new Spring(innerWidth / 2, { response: 0.26 });
@@ -357,7 +403,8 @@
     let running = false;
     const tick = (dt) => {
       x.step(dt); y.step(dt); s.step(dt);
-      el.style.transform = `translate3d(${x.value}px,${y.value}px,0) translate(-50%,-50%) scale(${Math.max(0, s.value)})`;
+      // put the bristle tip (14.72, 60.16 px into the 64px brush) on the pointer
+      el.style.transform = `translate3d(${x.value - 14.72}px,${y.value - 60.16}px,0) scale(${Math.max(0, s.value)})`;
       if (x.settled && y.settled && s.settled) { running = false; return false; }
     };
     const kick = () => { if (!running) { running = true; schedule(tick); } };

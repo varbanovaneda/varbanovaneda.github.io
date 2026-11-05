@@ -14,8 +14,9 @@
   hero.classList.add("has-paint");
 
   const PAPER = [232 / 255, 232 / 255, 225 / 255]; // --white, #E8E8E1
-  // rose, persimmon, ultramarine, sap green, ochre, violet — stored as absorbance (1 - colour)
-  const PALETTE = [[0.82, 0.32, 0.48], [0.93, 0.47, 0.16], [0.2, 0.33, 0.74], [0.38, 0.52, 0.24], [0.88, 0.66, 0.2], [0.46, 0.3, 0.64]]
+  // Light washes only, so the dark type always reads on top:
+  // blush, peach, sky, sage, butter, lavender — stored as absorbance (1 - colour)
+  const PALETTE = [[0.96, 0.72, 0.79], [0.99, 0.79, 0.64], [0.68, 0.81, 0.96], [0.75, 0.87, 0.69], [0.99, 0.9, 0.6], [0.81, 0.75, 0.94]]
     .map((c) => c.map((v) => 1 - v));
 
   /* ---------- Shaders ------------------------------------------------------- */
@@ -89,6 +90,8 @@
     float grain = hash(floor(gl_FragCoord.xy));
     float fiber = hash(floor(gl_FragCoord.xy * 0.33));
     A *= 1.0 + edge * 1.5 + (grain - 0.5) * 0.4 + (fiber - 0.5) * 0.25;      // granulation
+    float peak = max(max(A.r, A.g), A.b);                                     // layers never build up dark:
+    A *= min(1.0, 0.2 / max(peak, 1e-4));                                     // cap the density, keep the hue
     vec3 col = uPaper * exp(-A * 2.5);
     col *= 0.988 + 0.024 * fiber;                                             // paper tooth
     outColor = vec4(col, 1.0);
