@@ -80,6 +80,17 @@
   function roll(text) {
     return `<span class="roll"><span class="roll-in" data-text="${esc(text)}">${esc(text)}</span></span>`;
   }
+  /* Hand-drawn HB monogram, traced from Neda's sketch. Strokes use currentColor
+     so the mark always matches the nav text colour in light and dark. */
+  const LOGO_SVG = `<svg class="nav-logo-mark" viewBox="200 460 480 1335" aria-hidden="true" focusable="false">
+    <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M449 490 Q432 1120 440 1765"/>
+      <path d="M244 808 Q232 1060 230 1318"/>
+      <path d="M228 1018 Q330 1022 436 1026"/>
+      <path d="M462 646 L604 846 Q540 950 450 1022"/>
+      <path d="M455 1036 L650 1232 L460 1430"/>
+    </g>
+  </svg>`;
   function navHTML(page) {
     const S = window.SITE;
     const base = page === "home" ? "" : "index.html";
@@ -88,7 +99,7 @@
     return `
       <a class="skip-link" href="#main">Skip to content</a>
       <header class="nav" id="nav">
-        <a class="nav-logo" href="${page === "home" ? "#top" : "index.html"}" aria-label="${esc(S.name)} — home">${roll(S.name)}</a>
+        <a class="nav-logo" href="${page === "home" ? "#top" : "index.html"}" aria-label="${esc(S.name)} — home">${LOGO_SVG}</a>
         <nav aria-label="Primary">
           <ul class="nav-links">${link("work", "Work")}${link("about", "About")}${link("contact", "Contact")}</ul>
         </nav>
