@@ -315,6 +315,89 @@
     els.forEach((el) => io.observe(el));
   }
 
+  /* Watercolour wash between light and dark sections: the next colour blooms
+     up from the bottom of the screen with a soft, uneven, pigment-rimmed edge
+     until it covers the page. A fixed WebGL canvas behind the content, drawn
+     at half resolution (the edge is soft anyway) and only while a wash shows. */
+  function makeWash() {
+    const cv = document.createElement("canvas");
+    cv.className = "wash-canvas";
+    cv.setAttribute("aria-hidden", "true");
+    const gl = cv.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false, depth: false, stencil: false });
+    if (!gl) return null;
+    const FS = `precision highp float;
+    uniform vec2 uRes; uniform float uP, uT, uMaxR; uniform vec3 uTo, uRim;
+    float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+    float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y); }
+    float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++){ v += a * noise(p); p = p * 2.03 + vec2(17.1, 9.2); a *= 0.5; } return v; }
+    void main(){
+      vec2 uv = gl_FragCoord.xy / uRes.y;                     // y up, screen height = 1
+      vec2 d = uv - vec2(uRes.x / uRes.y * 0.5, -0.35);       // blooms from below the bottom edge
+      d.x *= 0.62;                                            // a wide, low dome
+      float r = length(d);
+      float lobes = fbm(vec2(atan(d.y, d.x) * 2.2, uT * 0.04)); // slow, uneven lobes along the edge
+      float n = fbm(uv * 1.7 + vec2(0.0, -uT * 0.05));         // finer bleeding
+      r += (lobes - 0.5) * 0.30 + (n - 0.5) * 0.22;
+      float R = uP * uMaxR;
+      float a = 1.0 - smoothstep(R - 0.30, R + 0.06, r);
+      // pigment pools at the drying edge, like a real wash
+      float rim = smoothstep(R - 0.34, R - 0.06, r) * (1.0 - smoothstep(R - 0.06, R + 0.06, r));
+      float g = noise(gl_FragCoord.xy * 0.45) - 0.5;           // paper grain
+      a = clamp(a + g * 0.12 * a * (1.0 - a), 0.0, 1.0);
+      gl_FragColor = vec4(mix(uTo, uRim, rim * 0.75) * a, a);
+    }`;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, "attribute vec2 aPos; void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }"));
+    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    const U = {};
+    ["uRes", "uP", "uT", "uMaxR", "uTo", "uRim"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
+    document.body.prepend(cv);
+
+    const css = getComputedStyle(document.documentElement);
+    const rgb = (name) => { const h = css.getPropertyValue(name).trim().replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+    const TONE = [rgb("--black"), rgb("--white")];
+    const RIM = [[0.56, 0.32, 0.18], [0.96, 0.87, 0.78]];   // burnt sienna into the dark, warm cream into the light
+
+    let p = 0, to = 0, loop = 0, on = false, w = 0, h = 0;
+    const t0 = performance.now();
+    const size = () => {
+      w = Math.max(1, Math.round(cv.clientWidth * 0.5)); h = Math.max(1, Math.round(cv.clientHeight * 0.5));
+      if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; gl.viewport(0, 0, w, h); }
+    };
+    const render = () => {
+      const visible = p > 0.002 && p < 0.998;
+      if (visible !== on) { on = visible; cv.classList.toggle("is-on", on); if (on) size(); }
+      if (!on) return false;
+      const asp = w / h, rmax = Math.hypot(0.31 * asp, 1.35) + 0.22;
+      gl.uniform2f(U.uRes, w, h);
+      gl.uniform1f(U.uP, p);
+      gl.uniform1f(U.uT, (performance.now() - t0) / 1000);
+      gl.uniform1f(U.uMaxR, rmax + 0.32);
+      gl.uniform3fv(U.uTo, TONE[to]);
+      gl.uniform3fv(U.uRim, RIM[to]);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      return true;
+    };
+    // the edge keeps breathing slowly while a wash is on screen
+    const tick = () => { loop = render() ? requestAnimationFrame(tick) : 0; };
+    addEventListener("resize", () => { if (on) { size(); render(); } });
+    return {
+      set(np, nt) {
+        p = np; to = nt;
+        if (render() && !loop) loop = requestAnimationFrame(tick);   // drawn now, in the same frame as --bg
+      },
+    };
+  }
+
   /* Sections declare data-tone="light|dark"; the page background eases
      between them as each section crosses the middle of the viewport. */
   function initTones() {
@@ -341,19 +424,30 @@
     const body = document.body;
     let ticking = false, last = -1;
     const smooth = (t) => t * t * t * (t * (t * 6 - 15) + 10);               // smootherstep
+    const wash = makeWash();                                                  // null without WebGL: plain fade
     const update = () => {
       ticking = false;
       const vh = innerHeight, mid = vh / 2;
       const rects = top.map((s) => [s.getBoundingClientRect(), s.dataset.tone === "light" ? 1 : 0]);
       // tone of the section under the middle of the screen (gaps/footer: the one above)
-      let light = rects[0][1];
+      let light = rects[0][1], zone = null;
       for (const [r, t] of rects) if (r.top <= mid) light = t;
       for (let i = 0; i < rects.length - 1; i++) {
         const [a, ta] = rects[i], [b, tb] = rects[i + 1];
         if (ta === tb) continue;
         const y = b.top;                                                       // the boundary
         const h = Math.min(vh * 0.9, a.height * 0.5, b.height * 0.5);          // half-width of the fade
-        if (Math.abs(mid - y) < h) { light = ta + (tb - ta) * smooth((mid - y + h) / (2 * h)); break; }
+        if (Math.abs(mid - y) < h) { zone = [ta, tb, (mid - y + h) / (2 * h)]; light = ta + (tb - ta) * smooth(zone[2]); break; }
+      }
+      if (wash) {
+        // the page keeps the colour we came from; the next colour blooms up over it
+        const [from, to, p] = zone || [light, light, 0];
+        const ink = Math.round(smooth(Math.min(1, Math.max(0, (light - 0.42) / 0.16))) * 1000) / 10;
+        body.classList.add("tone-wash");
+        body.style.setProperty("--bg", from ? "var(--white)" : "var(--black)");
+        body.style.setProperty("--fg", `color-mix(in oklab, var(--black) ${ink}%, var(--white))`);
+        wash.set(p, to);
+        return;
       }
       const pct = Math.round(light * 1000) / 10;
       if (pct === last) return;

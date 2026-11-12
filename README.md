@@ -25,6 +25,9 @@ js/project.js   Renders a project page from content.js
 ## Effects
 - **Living paint hero** (`js/paint.js`): a WebGL watercolour simulation. Move the mouse or swipe to paint.
   Its colours are in `PALETTE` at the top of the file.
+- **Watercolour wash between sections** (`makeWash` in `js/core.js`): scrolling from a light section to a dark
+  one (or back), the next colour blooms up from the bottom of the screen with a soft, uneven edge. Its edge colours
+  are in `RIM`. Without WebGL, or with reduced motion, the page fades between colours instead.
 - **Medium reveals**: each series in `SERIES` has `reveal`: `wash` (watercolour bloom), `print` (linocut
   roller), `spray` (droplets) or `sketch` (drawn wipe).
 - **Watercolour-bloom page transitions**: a stain in the series' `accent` colour spreads from the click

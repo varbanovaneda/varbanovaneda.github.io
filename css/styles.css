@@ -39,6 +39,10 @@ body {
 body[data-tone="light"] { --bg: var(--white); --fg: var(--black); }
 /* while the scroll drives the light/dark blend, follow it closely */
 body.tone-blend { transition: background-color 0.45s cubic-bezier(0.2, 0.6, 0.3, 1), color 0.45s cubic-bezier(0.2, 0.6, 0.3, 1); }
+/* with the watercolour wash the background swaps under a fully covered screen: no fade, or it would flash */
+body.tone-wash { transition: color 0.45s cubic-bezier(0.2, 0.6, 0.3, 1); }
+.wash-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; visibility: hidden; }
+.wash-canvas.is-on { visibility: visible; }
 
 [hidden] { display: none !important; }
 img, video, iframe { display: block; max-width: 100%; }
@@ -613,7 +617,12 @@ img.is-error { visibility: hidden; }
 .hero { position: relative; isolation: isolate; overflow: hidden; touch-action: pan-y; }
 .hero.has-paint { -webkit-user-select: none; user-select: none; cursor: crosshair; }
 .hero.has-paint a { cursor: pointer; }
-.paint-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; }
+.paint-canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block;
+  /* the paint thins out towards the bottom, so the wash below can bloom up into it */
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent);
+}
 .hero.no-paint {
   background:
     radial-gradient(40% 50% at 18% 72%, rgba(201, 87, 122, 0.32), transparent 70%),
