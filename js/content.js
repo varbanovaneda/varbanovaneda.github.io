@@ -16,21 +16,65 @@
   };
 
   window.SITE = {
+    /* COLOURS — the whole site and the 3D scene take their colours from here. */
+    theme: {
+      paper: "#FAFAFA",   // background
+      ink: "#413935",     // text, lines, the cursor
+      // soft washes in the 3D mist: mist blue, sage, blush, lavender grey, slate
+      washes: ["#AFC3D6", "#BCC9B4", "#EBCFCB", "#CEC8DE", "#8FA6B5"],
+      // the fine dots drifting between the layers
+      dots: ["#4F6FA8", "#C46A6A", "#413935", "#7FA08A"],
+    },
+
     name: "Neda Varbanova",
-    role: "Multidisciplinary Visual Artist",
+    role: "Designer & Visual Artist",
     location: "Sofia, Bulgaria",
     timezone: "Europe/Sofia",
     years: "2024—2027",
     email: "neda.varbanova@gmail.com",
     phone: { label: "+359 882874452", href: "tel:+359882874452" },
-    description: "Neda Varbanova — multidisciplinary visual artist from Sofia, Bulgaria. Watercolour, linocut, posters, illustration and brand design.",
+    description: "Neda Varbanova — designer and visual artist from Sofia, Bulgaria. Watercolour, linocut, posters, illustration and brand design.",
 
     availability: { available: true, label: "Available for projects and work" },
 
+    loader: { label: "Neda Varbanova — Portfolio" },
+
+    /* 1. HERO */
     hero: {
-      lines: ["Neda", "Varbanova"],
-      intro: "Multidisciplinary visual artist from Sofia, Bulgaria: watercolour, printmaking, posters, illustration and brand design.",
+      lines: ["Neda", "Varbanova"],                  // one entry per line of the big headline
+      kicker: "Designer & visual artist",
+      intro: "Watercolour, printmaking, posters, illustration and brand design, from Sofia, Bulgaria.",
+      hint: "Scroll to explore",
     },
+
+    /* 2. INTRO STATEMENT — revealed word by word as you scroll */
+    statement:
+      "Inspired by nature, music, people and the experiences that shape me, I weave fragments of my life into every piece I make, from a single watercolour to a whole brand.",
+
+    /* 4. CLIENTS — the endless marquee. Replace the placeholders with real names. */
+    marquee: {
+      label: "Clients & collaborators",
+      items: ["Puldin", "Red Beard Studio", "Robin", "UNIART", "Client Name", "Studio Name", "Gallery Name"],
+    },
+
+    /* 5. ACHIEVEMENTS — numbers count up when they scroll into view. Placeholders: edit freely. */
+    stats: [
+      { value: 40, suffix: "+", label: "Artworks painted and printed" },
+      { value: 7, suffix: "", label: "Projects in this portfolio" },
+      { value: 3, suffix: "", label: "Brand clients" },
+      { value: 1, suffix: "", label: "Exhibition" },
+    ],
+
+    /* 6. SERVICES — each opens to show its list */
+    services: [
+      { title: "Watercolour & painting", items: ["Still life & landscape", "Commissioned paintings", "Ink & wash sketches", "Mixed media"] },
+      { title: "Printmaking", items: ["Linocut", "Limited edition prints", "Exhibition series"] },
+      { title: "Illustration & characters", items: ["Character design", "Editorial illustration", "T-shirt & merchandise artwork"] },
+      { title: "Brand & packaging", items: ["Logo design", "Packaging illustration", "Posters & campaigns", "Brand applications"] },
+    ],
+
+    /* 7. CLOSING CALL TO ACTION */
+    cta: { lines: ["Let’s work", "together"], button: "Start a project" },
 
     ticker: "Neda Varbanova",
 

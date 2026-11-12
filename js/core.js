@@ -13,6 +13,12 @@
     String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const projectUrl = (p) => `project.html?p=${encodeURIComponent(p.slug)}`;
 
+  /* Colours from content.js (SITE.theme) override the defaults in styles.css. */
+  const theme = (window.SITE && window.SITE.theme) || {};
+  if (theme.paper) document.documentElement.style.setProperty("--white", theme.paper);
+  if (theme.ink) document.documentElement.style.setProperty("--black", theme.ink);
+  (theme.washes || []).forEach((c, i) => document.documentElement.style.setProperty(`--wash-${i + 1}`, c));
+
   /* ---------- Spring --------------------------------------------------------
      Apple-style parameters: damping ratio (1 = no overshoot) and response
      (seconds, how quickly it reaches the target). Always animates from the
@@ -484,50 +490,93 @@
     update();
   }
 
-  /* Cursor bubble — springs follow the pointer; it scales in over [data-cursor]. */
+  /* Cursor — a small dot on the pointer and a ring that trails it on a spring.
+     Over links and buttons the ring grows; over [data-cursor="Label"] it grows
+     further and shows the label. Mouse only; touch keeps the system behaviour. */
   function initCursor() {
     if (!finePointer.matches || reduceMotion.matches) return;
     document.documentElement.classList.add("has-cursor");
     const el = document.createElement("div");
     el.className = "cursor";
     el.setAttribute("aria-hidden", "true");
-    // Line-drawn paintbrush, bristle tip at (23,94) of the 100×100 drawing.
-    el.innerHTML = `<svg class="cursor-brush" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M57 53 C 68 42, 80 26, 86 14 C 88 10, 84 7, 80 10 C 70 18, 58 34, 50 47"/>
-      <path d="M51 43 C 55 43, 60 48, 60 52"/>
-      <path d="M53.5 47 L 55.5 50.5"/>
-      <path d="M50 47 L 41 59 M57 53 L 44 62"/>
-      <path d="M41 59 C 30 64, 22 74, 22 84 C 22 88, 22 92, 23 94 C 28 86, 36 80, 42 74 C 46 70, 46 64, 44 62 Z"/>
-      <path d="M39 64 C 35 68, 32 74, 31 79 M43 65 C 41 70, 40 73, 38 76"/>
-    </svg><span class="cursor-label"></span>`;
+    el.innerHTML = `<span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span>`;
     document.body.append(el);
-    const label = $(".cursor-label", el);
-    const x = new Spring(innerWidth / 2, { response: 0.26 });
-    const y = new Spring(innerHeight / 2, { response: 0.26 });
-    const s = new Spring(0, { response: 0.32, precision: 0.001 });
-    let running = false;
+    const ring = $(".cursor-ring", el), dot = $(".cursor-dot", el), label = $(".cursor-label", el);
+    const x = new Spring(innerWidth / 2, { response: 0.32 }), y = new Spring(innerHeight / 2, { response: 0.32 });
+    const s = new Spring(1, { response: 0.35, precision: 0.002 });
+    let px = innerWidth / 2, py = innerHeight / 2, running = false, shown = false;
     const tick = (dt) => {
       x.step(dt); y.step(dt); s.step(dt);
-      // put the bristle tip (14.72, 60.16 px into the 64px brush) on the pointer
-      el.style.transform = `translate3d(${x.value - 14.72}px,${y.value - 60.16}px,0) scale(${Math.max(0, s.value)})`;
+      dot.style.transform = `translate3d(${px}px,${py}px,0)`;
+      ring.style.transform = `translate3d(${x.value}px,${y.value}px,0) scale(${s.value.toFixed(3)})`;
       if (x.settled && y.settled && s.settled) { running = false; return false; }
     };
     const kick = () => { if (!running) { running = true; schedule(tick); } };
     addEventListener("pointermove", (e) => {
       if (e.pointerType !== "mouse") return;
-      if (s.value < 0.02) { x.snap(e.clientX); y.snap(e.clientY); }
-      x.target = e.clientX; y.target = e.clientY;
+      px = e.clientX; py = e.clientY;
+      if (!shown) { shown = true; x.snap(px); y.snap(py); el.classList.add("is-on"); }
+      x.target = px; y.target = py;
       kick();
     }, { passive: true });
+    const INTERACTIVE = "a, button, summary, label, [role='button'], [data-cursor]";
     document.addEventListener("pointerover", (e) => {
-      const t = e.target.closest("[data-cursor]");
-      if (t && t.dataset.cursor) { label.textContent = t.dataset.cursor; s.target = 1; }
-      else s.target = 0;
+      const t = e.target.closest(INTERACTIVE);
+      const text = t && t.dataset.cursor;
+      label.textContent = text || "";
+      el.classList.toggle("has-label", !!text);
+      s.target = text ? 3.4 : t ? 2.1 : 1;
       kick();
     });
-    document.documentElement.addEventListener("pointerleave", () => { s.target = 0; kick(); });
-    addEventListener("pointerdown", () => { if (s.target) { s.target = 0.85; kick(); } });
-    addEventListener("pointerup", () => { if (s.target) { s.target = 1; kick(); } });
+    document.documentElement.addEventListener("pointerleave", () => { el.classList.remove("is-on"); shown = false; });
+    addEventListener("pointerdown", () => { s.target *= 0.85; kick(); });
+    addEventListener("pointerup", () => { s.target /= 0.85; kick(); });
+  }
+
+  /* Smooth inertial scrolling (Lenis), driving GSAP's ScrollTrigger from the same clock.
+     Off with reduced motion: the browser's own scrolling is used instead. */
+  let lenis = null;
+  function initSmoothScroll() {
+    const { gsap, ScrollTrigger, Lenis } = window;
+    if (gsap && ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+    if (!Lenis || reduceMotion.matches) return;
+    lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
+    window.Site.lenis = lenis;
+    if (gsap && ScrollTrigger) {
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      const loop = (t) => { lenis.raf(t); requestAnimationFrame(loop); };
+      requestAnimationFrame(loop);
+    }
+    // in-page links glide instead of jumping (and still move keyboard focus there)
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest("a[href*='#']");
+      if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const url = new URL(a.href, location.href);
+      if (url.pathname !== location.pathname || url.search !== location.search || !url.hash) return;
+      const target = url.hash === "#top" ? 0 : document.getElementById(decodeURIComponent(url.hash.slice(1)));
+      if (target === null) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -24, duration: 1.6 });
+      history.pushState(null, "", url.hash);
+      if (target && target.focus) { target.setAttribute("tabindex", "-1"); target.focus({ preventScroll: true }); }
+    });
+  }
+
+  /* Film grain and a soft vignette over everything (decorative). */
+  function grainTile() {
+    const n = 160, c = document.createElement("canvas");
+    c.width = c.height = n;
+    const g = c.getContext("2d"), img = g.createImageData(n, n);
+    for (let i = 0; i < n * n; i++) {
+      const v = Math.random();
+      const dark = v < 0.5;
+      img.data.set(dark ? [65, 57, 53, (0.5 - v) * 90] : [255, 255, 255, (v - 0.5) * 110], i * 4);
+    }
+    g.putImageData(img, 0, 0);
+    return c.toDataURL();
   }
 
   /* ---------- Watercolour-bloom page transitions ---------------------------
@@ -681,10 +730,12 @@
 
   function mountChrome(page) {
     document.body.insertAdjacentHTML("afterbegin", navHTML(page) + '<div class="curtain" aria-hidden="true"></div>');
-    document.body.insertAdjacentHTML("beforeend", footerHTML());
+    document.body.insertAdjacentHTML("beforeend", footerHTML() + '<div class="vignette" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>');
+    try { $(".grain").style.backgroundImage = `url(${grainTile()})`; } catch {}
   }
 
   function init(page) {
+    initSmoothScroll();
     initHandwriting();
     initNavHide();
     initReveals();
@@ -700,6 +751,6 @@
   window.Site = {
     $, $$, esc, pad, clamp, projectUrl, roll, socialsHTML,
     Spring, schedule, imgTag, bindImages, initReveals,
-    reduceMotion, finePointer, mountChrome, init,
+    reduceMotion, finePointer, mountChrome, init, lenis: null,
   };
 })();

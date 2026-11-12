@@ -13,7 +13,7 @@
   if (i < 0) {
     document.title = `Not found — ${S.name}`;
     main.innerHTML = `
-      <section class="not-found" data-tone="dark">
+      <section class="not-found" data-tone="light">
         <p class="label muted">Error 404</p>
         <h1 class="display"><span class="line"><span class="line-in">Nothing here</span></span></h1>
         <a class="back-link label" href="index.html#work">← ${roll("Back to selected works")}</a>
@@ -80,7 +80,7 @@
 
   main.innerHTML = `
     <article class="project">
-      <header class="p-head" data-tone="dark">
+      <header class="p-head" data-tone="light">
         <div class="p-topline label">
           <a class="back-link" href="index.html#${series ? `series-${esc(series.id)}` : "work"}"><span aria-hidden="true">←</span>${roll(series ? `${pad(sIndex + 1)} ${series.title}` : "Selected works")}</a>
           <span class="muted">${pad(i + 1)} / ${pad(P.length)}</span>

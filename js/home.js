@@ -12,27 +12,87 @@
   const ratio = (im) => (im && im.width ? `${im.width} / ${im.height}` : "4 / 5");
   const seriesOf = (p) => SERIES.find((s) => s.id === p.series);
 
-  const lines = (arr, start = 0.35, step = 0.09) =>
-    arr.map((t, i) => `<span class="line"><span class="line-in" style="--d:${(start + i * step).toFixed(2)}s">${esc(t)}</span></span>`).join("");
-
   const status = () =>
     `<span class="status label${S.availability.available ? "" : " is-off"}"><span class="status-dot" aria-hidden="true"></span>${esc(S.availability.label)}</span>`;
 
+  /* The stage holds the hero (and, from step 2, the intro statement) over the fixed 3D canvas. */
   function heroHTML() {
+    const H = S.hero;
     return `
-      <section class="hero" id="top" data-tone="light" aria-label="Introduction">
-        <canvas class="paint-canvas" aria-hidden="true"></canvas>
-        <div class="hero-top">
-          <p class="hero-intro fade-up" style="--d:.7s">${esc(S.hero.intro)}</p>
-          <div class="hero-status fade-up" style="--d:.8s">${status()}</div>
-        </div>
-        <h1 class="display hero-title">${lines(S.hero.lines)}</h1>
-        <div class="hero-foot label fade-up" style="--d:.9s">
-          <span>${esc(S.role)} — ${esc(S.location)}</span>
-          <span class="paint-hint muted" aria-hidden="true"><span class="hint-fine">Move to paint</span><span class="hint-touch">Swipe sideways to paint</span></span>
-          <a class="scroll-cue" href="#work">${roll("Selected works")}<span class="arrow" aria-hidden="true">↓</span></a>
-        </div>
-      </section>`;
+      <div class="stage" id="top">
+        <canvas class="stage-canvas" aria-hidden="true"></canvas>
+        <section class="hero" data-tone="light" aria-label="Introduction">
+          <div class="hero-top">
+            <p class="hero-kicker label" data-intro style="--d:.5s">${esc(H.kicker || S.role)} — ${esc(S.location)}</p>
+            <div class="hero-status" data-intro style="--d:.6s">${status()}</div>
+          </div>
+          <h1 class="display hero-title" aria-label="${esc(H.lines.join(" "))}">${H.lines.map((t, i) =>
+            `<span class="hl" aria-hidden="true"><span class="hl-in" style="--d:${(0.08 + i * 0.12).toFixed(2)}s">${esc(t)}</span></span>`).join("")}</h1>
+          <div class="hero-foot">
+            <p class="hero-intro" data-intro style="--d:.55s">${esc(H.intro)}</p>
+            <a class="scroll-hint label" href="#work" data-intro style="--d:.7s"><span class="scroll-line" aria-hidden="true"></span>${esc(H.hint || "Scroll to explore")}</a>
+          </div>
+        </section>
+      </div>`;
+  }
+
+  /* Loading screen: the counter follows real work (fonts, then the 3D scene),
+     never runs shorter than ~1.2s, then the paper lifts and the headline rises.
+     Skipped when arriving from another page of this site. */
+  function loaderHTML() {
+    return `
+      <div class="loader" aria-hidden="true">
+        <span class="loader-label label">${esc((S.loader && S.loader.label) || S.name)}</span>
+        <span class="loader-num display">000</span>
+        <span class="loader-bar"><span class="loader-fill"></span></span>
+      </div>`;
+  }
+
+  function bootScene() {
+    const canvas = $(".stage-canvas");
+    const lite = matchMedia("(max-width: 768px), (pointer: coarse)").matches ||
+      (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
+    // a quick check before downloading Three.js: no WebGL, no scene (the CSS mist stays)
+    const probe = document.createElement("canvas");
+    if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return Promise.resolve(null);
+    return import("./scene.js")
+      .then(({ createScene }) => createScene(canvas, { theme: S.theme, lite, still: reduceMotion.matches, observe: $(".stage") }))
+      .then((scene) => { $(".stage").classList.add("has-gl"); return scene; })
+      .catch((err) => { console.warn("3D scene disabled:", err); return null; });
+  }
+
+  function intro(scenePromise) {
+    const root = document.documentElement;
+    const reveal = () => { root.classList.remove("is-loading"); $(".hero").classList.add("is-in"); window.Site.lenis && window.Site.lenis.start(); };
+    const internal = document.referrer && new URL(document.referrer, location.href).origin === location.origin;
+    if (internal) { reveal(); return; }
+
+    main.insertAdjacentHTML("beforebegin", loaderHTML());
+    const loader = $(".loader"), num = $(".loader-num", loader), fill = $(".loader-fill", loader);
+    root.classList.add("is-loading");
+    window.Site.lenis && window.Site.lenis.stop();
+    let fonts = 0, scene = 0, done = false;
+    document.fonts ? document.fonts.ready.then(() => (fonts = 1)) : (fonts = 1);
+    scenePromise.then(() => (scene = 1));
+    const t0 = performance.now(), MIN = reduceMotion.matches ? 0 : 1200, MAX = 6000;
+    let shown = 0, last = t0;
+    const step = (now) => {
+      const dt = (now - last) / 1000; last = now;
+      const elapsed = now - t0;
+      const real = 0.25 * fonts + 0.75 * scene;
+      const target = Math.min(elapsed >= MAX ? 1 : real, MIN ? elapsed / MIN : 1) * 100;
+      shown = reduceMotion.matches ? target : shown + (target - shown) * (1 - Math.exp(-dt * 6));
+      if (target >= 100 && shown > 99.4) shown = 100;
+      num.textContent = String(Math.round(shown)).padStart(3, "0");
+      fill.style.transform = `scaleX(${(shown / 100).toFixed(4)})`;
+      if (shown < 100) { requestAnimationFrame(step); return; }
+      if (done) return;
+      done = true;
+      loader.classList.add("is-done");
+      setTimeout(reveal, reduceMotion.matches ? 0 : 520);
+      setTimeout(() => loader.remove(), 1600);
+    };
+    requestAnimationFrame(step);
   }
 
   /* Cards keep the artwork's own proportions (never cropped). */
@@ -99,7 +159,7 @@
 
   function workHTML() {
     return `
-      <section class="work" id="work" data-tone="dark" aria-labelledby="work-title">
+      <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
         <div class="work-head">
           <h2 class="display work-title" id="work-title" data-reveal>Selected Works<span class="work-count">(${SERIES.length})</span></h2>
           <div class="view-toggle" role="group" aria-label="Layout" data-reveal style="--d:.1s">
@@ -136,7 +196,7 @@
     const C = S.contact;
     const insta = S.socials.find((s) => /instagram/i.test(s.label)) || S.socials[0];
     return `
-      <section class="contact" id="contact" data-tone="dark" aria-labelledby="contact-title">
+      <section class="contact" id="contact" data-tone="light" aria-labelledby="contact-title">
         <div class="section-head label"><span>Contact</span><span class="muted">Let's talk</span></div>
         <h2 class="sr-only" id="contact-title">Contact</h2>
         <div class="hand-contacts" data-write-group data-write-speed="0.045" data-write-delay="0.1">
@@ -263,4 +323,6 @@
   });
 
   window.Site.init("home");
+  const scene = bootScene();
+  intro(scene);
 })();
