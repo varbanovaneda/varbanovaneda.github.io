@@ -479,21 +479,23 @@ html:not(.has-cursor) .card-cta {
 /* a soft haze of light over the top-left corner, so the words sit clearly on the photo */
 .credit-card::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--white) 62%, transparent) 0%, color-mix(in srgb, var(--white) 22%, transparent) 38%, transparent 62%);
+  background: radial-gradient(115% 95% at 0% 0%, rgba(28, 23, 21, 0.5) 0%, rgba(28, 23, 21, 0.22) 40%, transparent 66%);
 }
 .credit-text {
   position: absolute; top: 0; left: 0; z-index: 1; margin: 0;
   padding: clamp(24px, 4.2vw, 72px); max-width: min(34ch, 46%);
-  /* written by hand, like a quick ballpoint note on the photo */
-  font: 400 clamp(1.5rem, 2.9vw, 2.9rem)/1.4 "Nothing You Could Do", "Bradley Hand", "Segoe Print", cursive; letter-spacing: 0; text-wrap: pretty;
-  color: var(--black);
+  /* a light, handwritten note on the photo: Caveat reads like natural pen writing and keeps its
+     shape in a pale colour over an image, where hairline scripts break up */
+  font: 400 clamp(1.75rem, 3.2vw, 3.25rem)/1.18 "Caveat", "Bradley Hand", "Segoe Print", cursive; letter-spacing: 0.005em; text-wrap: pretty;
+  color: var(--white);
+  text-shadow: 0 1px 14px rgba(28, 23, 21, 0.35);
 }
 @media (max-width: 640px) {
   .credit-card { aspect-ratio: 4 / 5; }
   .credit-card img { object-position: 64% 50%; }
-  .credit-text { max-width: 92%; font-size: 1.35rem; }
-  /* on a narrow photo the words fall over her hair: a soft haze of light from the top keeps them clear */
-  .credit-card::after { background: linear-gradient(180deg, color-mix(in srgb, var(--white) 80%, transparent) 0%, color-mix(in srgb, var(--white) 55%, transparent) 30%, transparent 55%); }
+  .credit-text { max-width: 92%; font-size: 1.6rem; }
+  /* on a narrow photo the words fall over her hair: a soft dusk from the top keeps them clear */
+  .credit-card::after { background: linear-gradient(180deg, rgba(28, 23, 21, 0.55) 0%, rgba(28, 23, 21, 0.3) 32%, transparent 58%); }
 }
 .contact-grid {
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 40px var(--gutter);
