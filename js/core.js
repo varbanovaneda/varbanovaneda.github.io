@@ -615,7 +615,7 @@
     g.filter = "blur(28px)";
     g.globalCompositeOperation = "destination-out";
     g.globalAlpha = 0.45; g.beginPath(); g.arc(size / 2 + (rand() - 0.5) * 60, size / 2 + (rand() - 0.5) * 60, size * 0.16, 0, Math.PI * 2); g.fill();
-    g.globalCompositeOperation = "source-atop"; g.filter = "none"; g.globalAlpha = 0.22; g.fillStyle = "#261E18";
+    g.globalCompositeOperation = "source-atop"; g.filter = "none"; g.globalAlpha = 0.06; g.fillStyle = "#413935";
     for (let k = 0; k < 2600; k++) g.fillRect(rand() * size, rand() * size, 1.2, 1.2);
     return c.toDataURL();
   }
@@ -674,7 +674,8 @@
       const wash = document.createElement("div");
       wash.className = "vt-wash";
       wash.setAttribute("aria-hidden", "true");
-      wash.style.backgroundImage = `url(${stainCanvas(vt.seed, vt.color)})`;
+      // the wash is the colour of the page's paper, so the new page blooms out of the background itself
+      wash.style.backgroundImage = `url(${stainCanvas(vt.seed, theme.paper || "#FAFAFA")})`;
       wash.style.setProperty("--wash", vt.color);
       document.body.append(wash);
 
