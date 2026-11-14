@@ -307,5 +307,12 @@
   });
 
   window.Site.init("home");
+
+  /* Once the page has loaded, fetch the remaining artwork quietly in the background,
+     so each image is already there when its card scrolls into view. */
+  const warm = () => $$(".card img[loading='lazy']").forEach((img) => (img.loading = "eager"));
+  const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 1200));
+  if (document.readyState === "complete") idle(warm);
+  else addEventListener("load", () => idle(warm), { once: true });
   intro();
 })();

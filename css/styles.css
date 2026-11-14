@@ -707,7 +707,7 @@ img.is-error { visibility: hidden; }
 .js [data-medium="wash"] .card[data-reveal].is-in .card-frame img { filter: none; }
 
 /* print */
-.js [data-medium="print"] .card[data-reveal] .card-media { --rv: 0%; transition: --rv 1.6s cubic-bezier(0.65, 0, 0.35, 1) 0.1s, transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out); }
+.js [data-medium="print"] .card[data-reveal] .card-media { --rv: 0%; transition: --rv 0.8s cubic-bezier(0.65, 0, 0.35, 1), transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out); }
 .js [data-medium="print"] .card[data-reveal] .card-frame {
   -webkit-mask-image: linear-gradient(90deg, #000 var(--rv), transparent calc(var(--rv) + 0.6%));
   mask-image: linear-gradient(90deg, #000 var(--rv), transparent calc(var(--rv) + 0.6%));
@@ -719,10 +719,10 @@ img.is-error { visibility: hidden; }
   box-shadow: 0 0 24px rgba(38, 30, 24, 0.35);
   transition: opacity 0.4s ease;
 }
-.js [data-medium="print"] .card[data-reveal].is-in .card-media::after { opacity: 0; transition-delay: 1.55s; }
+.js [data-medium="print"] .card[data-reveal].is-in .card-media::after { opacity: 0; transition-delay: 0.75s; }
 .js [data-medium="print"] .card[data-reveal] .card-frame img {
   filter: drop-shadow(6px 3px 0 rgba(79, 111, 153, 0.6)) contrast(1.15) brightness(0.92);
-  transition: filter 0.9s var(--ease-out) 1.4s, transform 1.4s var(--ease-out), opacity 0.9s var(--ease-out);
+  transition: filter 0.6s var(--ease-out) 0.7s, transform 1.4s var(--ease-out), opacity 0.5s var(--ease-out);
 }
 .js [data-medium="print"] .card[data-reveal].is-in .card-media { --rv: 101%; }
 .js [data-medium="print"] .card[data-reveal].is-in .card-frame img { filter: drop-shadow(0 0 0 rgba(79, 111, 153, 0)) contrast(1) brightness(1); }
@@ -746,7 +746,7 @@ img.is-error { visibility: hidden; }
 }
 
 /* sketch */
-.js [data-medium="sketch"] .card[data-reveal] .card-media { --rv: -10%; transition: --rv 1.7s cubic-bezier(0.55, 0, 0.25, 1), transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out); }
+.js [data-medium="sketch"] .card[data-reveal] .card-media { --rv: -10%; transition: --rv 0.85s cubic-bezier(0.55, 0, 0.25, 1), transform 0.6s var(--ease-out), opacity 0.6s var(--ease-out); }
 .js [data-medium="sketch"] .card[data-reveal] .card-frame {
   -webkit-mask-image: linear-gradient(115deg, #000 var(--rv), rgba(0, 0, 0, 0.35) calc(var(--rv) + 2%), transparent calc(var(--rv) + 7%));
   mask-image: linear-gradient(115deg, #000 var(--rv), rgba(0, 0, 0, 0.35) calc(var(--rv) + 2%), transparent calc(var(--rv) + 7%));

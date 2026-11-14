@@ -168,7 +168,7 @@
 
     function resize() {
       const r = canvas.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(devicePixelRatio || 1, trail ? 1 : 1.5);
       const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       aspect = r.width / Math.max(1, r.height);
@@ -249,7 +249,7 @@
     if (trail) addEventListener("scroll", () => { pointer = null; }, { passive: true });
 
     function drainQueue() {
-      let budget = 16;
+      let budget = 48;                                                          // enough to catch up with a fast hand in one frame
       while (queue.length && budget > 0) {
         const s = queue.shift();
         const dx = (s.x1 - s.x0) * aspect, dy = s.y1 - s.y0;

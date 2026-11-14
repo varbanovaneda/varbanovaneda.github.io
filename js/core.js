@@ -502,7 +502,7 @@
     el.innerHTML = `<span class="cursor-ring"></span><span class="cursor-dot"></span>`;
     document.body.append(el);
     const ring = $(".cursor-ring", el), dot = $(".cursor-dot", el);
-    const x = new Spring(innerWidth / 2, { response: 0.32 }), y = new Spring(innerHeight / 2, { response: 0.32 });
+    const x = new Spring(innerWidth / 2, { response: 0.13 }), y = new Spring(innerHeight / 2, { response: 0.13 });
     const s = new Spring(1, { response: 0.35, precision: 0.002 });
     let px = innerWidth / 2, py = innerHeight / 2, running = false, shown = false;
     const tick = (dt) => {
