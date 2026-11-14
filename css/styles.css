@@ -142,11 +142,9 @@ h1, h2, h3, p { margin: 0; }
 .nav a:active { opacity: 0.6; }
 
 /* ---------- Stage + hero ---------------------------------------------------
-   The 3D canvas is fixed behind the stage; every section after it has the paper
-   background, so it slides up over the scene like a sheet. */
+   Every section after the hero has the paper background. */
 .stage { position: relative; }
-.stage-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; pointer-events: none; }
-/* without WebGL (or before it starts): a still, misty wash in the same colours */
+/* without WebGL2: a still, misty wash in the same colours behind the hero */
 .stage::before {
   content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
   background:
@@ -155,7 +153,6 @@ h1, h2, h3, p { margin: 0; }
     radial-gradient(55% 40% at 60% 12%, color-mix(in srgb, var(--wash-3) 55%, transparent), transparent 70%),
     var(--white);
 }
-.stage.has-gl::before { display: none; }
 #main > :not(.stage), .footer { position: relative; background: var(--bg); }
 
 .hero {
@@ -178,8 +175,15 @@ h1, h2, h3, p { margin: 0; }
   border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
 }
 .hero-intro { max-width: 40ch; font-size: clamp(1rem, 1.2vw, 1.1875rem); line-height: 1.45; letter-spacing: -0.01em; }
-/* the paint layer multiplies onto the 3D scene, so strokes tint the mist like watercolour */
-.paint-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; mix-blend-mode: multiply; pointer-events: none; }
+/* the hero's background: watercolour on paper that you paint by moving the mouse (paint.js) */
+.paint-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; display: block; pointer-events: none; }
+
+/* behind the works: the cursor leaves a fading watercolour trail. The canvas stays on
+   screen (sticky) while the section scrolls; the paintings sit above it. */
+.trail-layer { position: absolute; inset: 0; z-index: -1; pointer-events: none; display: none; }
+.trail-canvas { position: sticky; top: 0; display: block; width: 100%; height: 100vh; }
+.work.has-trail .trail-layer { display: block; }
+#main > .work.has-trail { background: transparent; }
 .hero:not(.has-paint) .paint-hint { display: none; }
 @media (max-width: 640px) { .paint-hint { display: none; } }
 .scroll-hint { display: inline-flex; align-items: center; gap: 12px; white-space: nowrap; }
@@ -467,7 +471,11 @@ html:not(.has-cursor) .card-cta {
 @media (hover: hover) { .copy-btn:hover { background: var(--fg); color: var(--bg); } }
 .contact-note { margin-top: 20px; max-width: 46ch; opacity: 0.6; }
 .credit {
-  margin: clamp(56px, 7vw, 120px) auto 0; max-width: 32ch; text-align: center; text-wrap: balance;
+  margin-top: clamp(48px, 6vw, 96px); padding-top: clamp(40px, 5vw, 80px);
+  border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
+}
+.credit p {
+  margin: 0 auto; max-width: 32ch; text-align: center; text-wrap: balance;
   font: 500 clamp(1.375rem, 2.6vw, 2.5rem)/1.25 var(--font-body); letter-spacing: -0.025em;
 }
 .contact-grid {
@@ -868,7 +876,7 @@ img.is-error { visibility: hidden; }
 .hand-footer { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px var(--gutter); align-items: end; padding: clamp(32px, 4vw, 56px) var(--gutter) 28px; font-size: 1rem; }
 .hf-bottom {
   grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  padding-top: 18px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); font-size: 0.8125rem;
+  font-size: 0.8125rem;
 }
 @media (max-width: 900px) {
   .hand-item:nth-child(2), .hand-item:nth-child(3) { grid-column: 1 / -1; }

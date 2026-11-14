@@ -15,12 +15,11 @@
   const status = () =>
     `<span class="status label${S.availability.available ? "" : " is-off"}"><span class="status-dot" aria-hidden="true"></span>${esc(S.availability.label)}</span>`;
 
-  /* The stage holds the hero (and, from step 2, the intro statement) over the fixed 3D canvas. */
+  /* The stage holds the hero; its background is the living watercolour (paint.js). */
   function heroHTML() {
     const H = S.hero;
     return `
       <div class="stage" id="top">
-        <canvas class="stage-canvas" aria-hidden="true"></canvas>
         <section class="hero" data-tone="light" aria-label="Introduction">
           <canvas class="paint-canvas" aria-hidden="true"></canvas>
           <div class="hero-top">
@@ -38,7 +37,7 @@
       </div>`;
   }
 
-  /* Loading screen: the counter follows real work (fonts, then the 3D scene),
+  /* Loading screen: the counter follows real work (the fonts),
      never runs shorter than ~1.2s, then the paper lifts and the headline rises.
      Skipped when arriving from another page of this site. */
   function loaderHTML() {
@@ -50,20 +49,7 @@
       </div>`;
   }
 
-  function bootScene() {
-    const canvas = $(".stage-canvas");
-    const lite = matchMedia("(max-width: 768px), (pointer: coarse)").matches ||
-      (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
-    // a quick check before downloading Three.js: no WebGL, no scene (the CSS mist stays)
-    const probe = document.createElement("canvas");
-    if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) return Promise.resolve(null);
-    return import("./scene.js")
-      .then(({ createScene }) => createScene(canvas, { theme: S.theme, lite, still: reduceMotion.matches, observe: $(".stage") }))
-      .then((scene) => { $(".stage").classList.add("has-gl"); return scene; })
-      .catch((err) => { console.warn("3D scene disabled:", err); return null; });
-  }
-
-  function intro(scenePromise) {
+  function intro() {
     const root = document.documentElement;
     const reveal = () => { root.classList.remove("is-loading"); $(".hero").classList.add("is-in"); window.Site.lenis && window.Site.lenis.start(); };
     const internal = document.referrer && new URL(document.referrer, location.href).origin === location.origin;
@@ -73,15 +59,14 @@
     const loader = $(".loader"), num = $(".loader-num", loader), fill = $(".loader-fill", loader);
     root.classList.add("is-loading");
     window.Site.lenis && window.Site.lenis.stop();
-    let fonts = 0, scene = 0, done = false;
+    let fonts = 0, done = false;
     document.fonts ? document.fonts.ready.then(() => (fonts = 1)) : (fonts = 1);
-    scenePromise.then(() => (scene = 1));
     const t0 = performance.now(), MIN = reduceMotion.matches ? 0 : 1200, MAX = 6000;
     let shown = 0, last = t0;
     const step = (now) => {
       const dt = (now - last) / 1000; last = now;
       const elapsed = now - t0;
-      const real = 0.25 * fonts + 0.75 * scene;
+      const real = fonts;
       const target = Math.min(elapsed >= MAX ? 1 : real, MIN ? elapsed / MIN : 1) * 100;
       shown = reduceMotion.matches ? target : shown + (target - shown) * (1 - Math.exp(-dt * 6));
       if (target >= 100 && shown > 99.4) shown = 100;
@@ -162,6 +147,7 @@
   function workHTML() {
     return `
       <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
+        <div class="trail-layer" aria-hidden="true"><canvas class="trail-canvas"></canvas></div>
         <div class="work-head">
           <h2 class="display work-title" id="work-title" data-reveal>Selected Works<span class="work-count">(${SERIES.length})</span></h2>
           <div class="view-toggle" role="group" aria-label="Layout" data-reveal style="--d:.1s">
@@ -220,7 +206,7 @@
           </div>` : ""}
         </div>
         ${C.note ? `<p class="contact-note" data-reveal>${esc(C.note)}</p>` : ""}
-        ${S.credit ? `<p class="credit" data-reveal>${esc(S.credit)}</p>` : ""}
+        ${S.credit ? `<div class="credit"><p data-reveal>${esc(S.credit)}</p></div>` : ""}
       </section>`;
   }
 
@@ -321,6 +307,5 @@
   });
 
   window.Site.init("home");
-  const scene = bootScene();
-  intro(scene);
+  intro();
 })();

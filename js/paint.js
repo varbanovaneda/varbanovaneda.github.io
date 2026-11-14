@@ -1,28 +1,20 @@
 /* ==========================================================================
-   Living paint hero — move the mouse (or swipe) over the hero to paint.
-   A small WebGL watercolour simulation: pigment is stored as absorbance and
-   drawn as the light it lets through, and the canvas multiplies onto the 3D
-   scene below (mix-blend-mode in styles.css), so strokes layer over the mist
-   like real washes. Water spreads pigment while wet, then evaporates; edges
-   darken where pigment pools. The colour drifts through the palette as you
-   paint and jumps to the next one after a pause. Colours: SITE.theme.washes.
+   Living watercolour — a small WebGL simulation used in two places:
+   • the hero: paint on the paper by moving the mouse (or swiping); opening
+     blooms, and a slow idle brush when you stop;
+   • behind the works: the cursor leaves a watercolour trail that fades away.
+   Pigment is stored as absorbance and rendered with Beer–Lambert over paper,
+   so colours layer subtractively like real washes. Water spreads pigment
+   while wet, then evaporates; edges darken where pigment pools.
+   Colours: SITE.theme.paper and SITE.theme.washes in content.js.
    ========================================================================== */
 (function () {
-  const hero = document.querySelector(".hero");
-  const canvas = hero && hero.querySelector(".paint-canvas");
-  if (!canvas) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: "high-performance" });
-  if (!gl) { hero.classList.add("no-paint"); return; }
-  hero.classList.add("has-paint");
-
-  // the theme's washes, a little deeper so a stroke reads over the mist; stored as absorbance (1 - colour)
+  const T = (window.SITE && window.SITE.theme) || {};
   const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
-  const PALETTE = ((window.SITE && window.SITE.theme && window.SITE.theme.washes) || ["#AFC3D6", "#BCC9B4", "#EBCFCB", "#CEC8DE", "#8FA6B5"])
-    .map((h) => hex(h).map((v) => Math.min(1, (1 - v) * 1.6)));
-  const N = PALETTE.length;
-  // a colour part-way between two neighbours in the palette (t = 2.5 → halfway from the 3rd to the 4th)
-  const colorAt = (t) => { const i = Math.floor(t), f = t - i, a = PALETTE[((i % N) + N) % N], b = PALETTE[(((i + 1) % N) + N) % N]; return a.map((v, k) => v + (b[k] - v) * f); };
+  const PAPER = hex(T.paper || "#FAFAFA");
+  // light washes, so the dark type always reads on top — stored as absorbance (1 - colour)
+  const PALETTE = (T.washes || ["#AFC3D6", "#BCC9B4", "#EBCFCB", "#CEC8DE", "#8FA6B5"]).map((h) => hex(h).map((v) => 1 - v));
 
   /* ---------- Shaders ------------------------------------------------------- */
   const VS = `#version 300 es
@@ -56,7 +48,7 @@
     outColor = enc(v);
   }`;
   const DYE_STEP = `
-  uniform sampler2D uDye; uniform sampler2D uVel; uniform vec2 uTexel; uniform float uDt;
+  uniform sampler2D uDye; uniform sampler2D uVel; uniform vec2 uTexel; uniform float uDt; uniform float uClean;
   void main(){
     vec2 v = dec(texture(uVel, vUv));
     vec2 p = vUv - v * uDt;
@@ -68,7 +60,7 @@
     c.rgb = mix(c.rgb, n.rgb, clamp((0.008 + 0.2 * wet) * f, 0.0, 0.9));    // pigment moves while wet
     c.a = mix(c.a, n.a, clamp(0.35 * f, 0.0, 0.9));                           // water spreads
     c.a *= pow(0.5, uDt);                                                     // evaporation
-    c.rgb *= pow(0.992, uDt);                                                 // the page slowly breathes clean
+    c.rgb *= pow(uClean, uDt);                                                // the paper slowly breathes clean
     outColor = clamp(c, 0.0, 1.0);
   }`;
   const DYE_SPLAT = `
@@ -86,7 +78,7 @@
     outColor = clamp(c, 0.0, 1.0);
   }`;
   const DISPLAY = `
-  uniform sampler2D uDye; uniform vec2 uTexel;
+  uniform sampler2D uDye; uniform vec2 uTexel; uniform vec3 uPaper;
   void main(){
     vec3 A = texture(uDye, vUv).rgb;
     vec3 ax = texture(uDye, vUv + vec2(uTexel.x, 0.0)).rgb - texture(uDye, vUv - vec2(uTexel.x, 0.0)).rgb;
@@ -97,232 +89,260 @@
     A *= 1.0 + edge * 1.5 + (grain - 0.5) * 0.4 + (fiber - 0.5) * 0.25;      // granulation
     float peak = max(max(A.r, A.g), A.b);                                     // layers never build up dark:
     A *= min(1.0, 0.2 / max(peak, 1e-4));                                     // cap the density, keep the hue
-    outColor = vec4(exp(-A * 2.5), 1.0);                                      // white = untouched, multiplied over the scene
+    vec3 col = uPaper * exp(-A * 2.5);
+    col *= 0.988 + 0.024 * fiber;                                             // paper tooth
+    outColor = vec4(col, 1.0);
   }`;
 
-  function shader(type, src) {
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
-    return s;
-  }
-  const vso = shader(gl.VERTEX_SHADER, VS);
-  function program(fs) {
-    const p = gl.createProgram();
-    gl.attachShader(p, vso);
-    gl.attachShader(p, shader(gl.FRAGMENT_SHADER, HEAD + fs));
-    gl.bindAttribLocation(p, 0, "aPos");
-    gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
-    const u = {};
-    for (let k = 0, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS); k < n; k++) {
-      const info = gl.getActiveUniform(p, k);
-      u[info.name] = gl.getUniformLocation(p, info.name);
+  /* host: the element that receives the pointer; canvas: where the paint is drawn.
+     trail: a fading cursor trail (no opening blooms, no idle brush). */
+  function createPaint(host, canvas, { trail = false } = {}) {
+    const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: "high-performance" });
+    if (!gl) return false;
+
+    function shader(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      return s;
     }
-    return { p, u };
-  }
-
-  let progs;
-  try {
-    progs = { velStep: program(VEL_STEP), velSplat: program(VEL_SPLAT), dyeStep: program(DYE_STEP), dyeSplat: program(DYE_SPLAT), display: program(DISPLAY) };
-  } catch (err) {
-    console.warn("Paint hero disabled:", err);
-    hero.classList.replace("has-paint", "no-paint");
-    return;
-  }
-
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-
-  /* ---------- Render targets (half-float when available) ------------------ */
-  let fmt = { internal: gl.RGBA8, type: gl.UNSIGNED_BYTE };
-  if (gl.getExtension("EXT_color_buffer_float") || gl.getExtension("EXT_color_buffer_half_float")) fmt = { internal: gl.RGBA16F, type: gl.HALF_FLOAT };
-
-  function target(w, h) {
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, fmt.internal, w, h, 0, gl.RGBA, fmt.type, null);
-    const fb = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-    return { tex, fb, ok: gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE };
-  }
-  function pair(w, h, clear) {
-    const a = target(w, h), b = target(w, h);
-    [a, b].forEach((t) => { gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb); gl.clearColor(...clear); gl.clear(gl.COLOR_BUFFER_BIT); });
-    return { read: a, write: b, ok: a.ok && b.ok, swap() { [this.read, this.write] = [this.write, this.read]; } };
-  }
-
-  let simW = 0, simH = 0, aspect = 1, vel, dye;
-  function allocate() {
-    vel = pair(simW, simH, [0.5, 0.5, 0, 1]);   // 0.5 encodes zero velocity
-    dye = pair(simW, simH, [0, 0, 0, 0]);
-    if (!vel.ok && fmt.type !== gl.UNSIGNED_BYTE) { fmt = { internal: gl.RGBA8, type: gl.UNSIGNED_BYTE }; allocate(); }
-  }
-
-  function resize() {
-    const r = hero.getBoundingClientRect();
-    const dpr = Math.min(devicePixelRatio || 1, 1.5);
-    const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
-    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-    aspect = r.width / Math.max(1, r.height);
-    const sw = Math.round(Math.min(360, Math.max(160, r.width / 3.2)));
-    const sh = Math.max(64, Math.round(sw / aspect));
-    // Re-allocate (clears the paint) only on a real size change, not the mobile URL bar.
-    if (!vel || Math.abs(sw - simW) / simW > 0.15 || Math.abs(sh - simH) / simH > 0.25) {
-      simW = sw; simH = sh; allocate();
+    function program(fs, vso) {
+      const p = gl.createProgram();
+      gl.attachShader(p, vso);
+      gl.attachShader(p, shader(gl.FRAGMENT_SHADER, HEAD + fs));
+      gl.bindAttribLocation(p, 0, "aPos");
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+      const u = {};
+      for (let k = 0, n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS); k < n; k++) {
+        const info = gl.getActiveUniform(p, k);
+        u[info.name] = gl.getUniformLocation(p, info.name);
+      }
+      return { p, u };
     }
-  }
 
-  function pass(prog, out, uniforms) {
-    gl.useProgram(prog.p);
-    let unit = 0;
-    for (const name in uniforms) {
-      const loc = prog.u[name];
-      if (loc == null) continue;
-      const v = uniforms[name];
-      if (v && v.tex) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, v.tex); gl.uniform1i(loc, unit++); }
-      else if (typeof v === "number") gl.uniform1f(loc, v);
-      else if (v.length === 2) gl.uniform2f(loc, v[0], v[1]);
-      else gl.uniform3f(loc, v[0], v[1], v[2]);
+    let progs;
+    try {
+      const vso = shader(gl.VERTEX_SHADER, VS);
+      progs = { velStep: program(VEL_STEP, vso), velSplat: program(VEL_SPLAT, vso), dyeStep: program(DYE_STEP, vso), dyeSplat: program(DYE_SPLAT, vso), display: program(DISPLAY, vso) };
+    } catch (err) {
+      console.warn("Paint disabled:", err);
+      return false;
     }
-    if (out) { gl.bindFramebuffer(gl.FRAMEBUFFER, out.fb); gl.viewport(0, 0, simW, simH); }
-    else { gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height); }
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
 
-  function splat(x, y, fx, fy, color, amount, water, radius) {
-    pass(progs.velSplat, vel.write, { uVel: vel.read, uPoint: [x, y], uForce: [fx, fy], uRadius: radius, uAspect: aspect });
-    vel.swap();
-    pass(progs.dyeSplat, dye.write, { uDye: dye.read, uPoint: [x, y], uColor: color, uAmount: amount, uWater: water, uRadius: radius, uAspect: aspect });
-    dye.swap();
-  }
-  let time = 0;
-  function step(dt) {
-    pass(progs.velStep, vel.write, { uVel: vel.read, uDt: dt, uTime: time });
-    vel.swap();
-    pass(progs.dyeStep, dye.write, { uDye: dye.read, uVel: vel.read, uTexel: [1 / simW, 1 / simH], uDt: dt });
-    dye.swap();
-  }
-  function render() {
-    pass(progs.display, null, { uDye: dye.read, uTexel: [1 / simW, 1 / simH] });
-  }
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-  /* ---------- Input: the brush ---------------------------------------------- */
-  let hue = Math.floor(Math.random() * N);          // position in the palette; grows as the brush travels
-  let pointer = null, lastInput = -1e9;
-  const queue = [];
-  function onMove(e) {
-    const r = canvas.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width, y = 1 - (e.clientY - r.top) / r.height;
-    if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; return; }
-    const now = performance.now();
-    if (!pointer || now - pointer.t > 250) {
-      if (now - lastInput > 600) hue = Math.floor(hue) + 1;                      // a pause starts a new colour
-      pointer = { x, y, t: now };
-    } else {
-      queue.push({ x0: pointer.x, y0: pointer.y, x1: x, y1: y, dt: Math.max((now - pointer.t) / 1000, 1 / 240) });
-      pointer = { x, y, t: now };
+    /* ---------- Render targets (half-float when available) ---------------- */
+    let fmt = { internal: gl.RGBA8, type: gl.UNSIGNED_BYTE };
+    if (gl.getExtension("EXT_color_buffer_float") || gl.getExtension("EXT_color_buffer_half_float")) fmt = { internal: gl.RGBA16F, type: gl.HALF_FLOAT };
+
+    function target(w, h) {
+      const tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, fmt.internal, w, h, 0, gl.RGBA, fmt.type, null);
+      const fb = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      return { tex, fb, ok: gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE };
     }
-    lastInput = now;
-    wake();
-  }
-  hero.addEventListener("pointermove", onMove, { passive: true });
-  hero.addEventListener("pointerdown", (e) => {
-    onMove(e);
-    if (!pointer) return;
-    hue = Math.floor(hue) + 1;
-    splat(pointer.x, pointer.y, 0, 0, colorAt(hue), 0.55, 1, 0.006);        // a tap drops a bloom
-  }, { passive: true });
-  hero.addEventListener("pointerleave", () => { pointer = null; });
+    function pair(w, h, clear) {
+      const a = target(w, h), b = target(w, h);
+      [a, b].forEach((t) => { gl.bindFramebuffer(gl.FRAMEBUFFER, t.fb); gl.clearColor(...clear); gl.clear(gl.COLOR_BUFFER_BIT); });
+      return { read: a, write: b, ok: a.ok && b.ok, swap() { [this.read, this.write] = [this.write, this.read]; } };
+    }
 
-  function drainQueue() {
-    let budget = 16;
-    while (queue.length && budget > 0) {
-      const s = queue.shift();
-      const dx = (s.x1 - s.x0) * aspect, dy = s.y1 - s.y0;
-      const dist = Math.hypot(dx, dy);
-      const speed = dist / s.dt;
-      const steps = Math.min(8, Math.max(1, Math.ceil(dist / 0.01)));
-      const fx = Math.max(-1.4, Math.min(1.4, (s.x1 - s.x0) / s.dt)) * 0.35;
-      const fy = Math.max(-1.4, Math.min(1.4, (s.y1 - s.y0) / s.dt)) * 0.35;
-      const amount = (0.11 * Math.max(0.35, Math.min(1, 1.3 - speed * 0.35))) / Math.sqrt(steps);
-      for (let k = 1; k <= steps; k++) {
-        const t = k / steps;
-        hue += (dist / steps) * 1.4;                                               // about one colour per two-thirds of the screen
-        splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, colorAt(hue), amount, 0.85, 0.0026);
-        budget--;
+    let simW = 0, simH = 0, aspect = 1, vel, dye;
+    function allocate() {
+      vel = pair(simW, simH, [0.5, 0.5, 0, 1]);   // 0.5 encodes zero velocity
+      dye = pair(simW, simH, [0, 0, 0, 0]);
+      if (!vel.ok && fmt.type !== gl.UNSIGNED_BYTE) { fmt = { internal: gl.RGBA8, type: gl.UNSIGNED_BYTE }; allocate(); }
+    }
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio || 1, 1.5);
+      const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+      if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+      aspect = r.width / Math.max(1, r.height);
+      const sw = Math.round(Math.min(360, Math.max(160, r.width / 3.2)));
+      const sh = Math.max(64, Math.round(sw / aspect));
+      // Re-allocate (clears the paint) only on a real size change, not the mobile URL bar.
+      if (!vel || Math.abs(sw - simW) / simW > 0.15 || Math.abs(sh - simH) / simH > 0.25) {
+        simW = sw; simH = sh; allocate();
       }
     }
-    if (queue.length > 48) queue.splice(0, queue.length - 48); // never lag far behind the hand
-  }
 
-  /* ---------- Opening blooms + idle brush ----------------------------------- */
-  const intro = [
-    { at: 0.15, x: 0.18, y: 0.7, c: 0, r: 0.016 },
-    { at: 0.45, x: 0.78, y: 0.78, c: 1, r: 0.012 },
-    { at: 0.8, x: 0.62, y: 0.42, c: 2, r: 0.014 },
-    { at: 1.15, x: 0.35, y: 0.3, c: 4, r: 0.01 },
-    { at: 1.5, x: 0.9, y: 0.35, c: 5, r: 0.011 },
-    { at: 1.9, x: 0.08, y: 0.25, c: 3, r: 0.009 },
-  ];
-  function runIntro() {
-    while (intro.length && intro[0].at <= time) {
-      const b = intro.shift();
-      const jitter = () => (Math.random() - 0.5) * 0.08;
-      splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % N], 0.42, 1, b.r);
-      splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % N], 0.22, 1, b.r * 0.45);
+    function pass(prog, out, uniforms) {
+      gl.useProgram(prog.p);
+      let unit = 0;
+      for (const name in uniforms) {
+        const loc = prog.u[name];
+        if (loc == null) continue;
+        const v = uniforms[name];
+        if (v && v.tex) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, v.tex); gl.uniform1i(loc, unit++); }
+        else if (typeof v === "number") gl.uniform1f(loc, v);
+        else if (v.length === 2) gl.uniform2f(loc, v[0], v[1]);
+        else gl.uniform3f(loc, v[0], v[1], v[2]);
+      }
+      if (out) { gl.bindFramebuffer(gl.FRAMEBUFFER, out.fb); gl.viewport(0, 0, simW, simH); }
+      else { gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, canvas.width, canvas.height); }
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
-  }
-  function idleBrush(now) {
-    if (reduce || now - lastInput < 3500 || intro.length) return;
-    const t = time * 0.35;
-    const x = 0.5 + 0.42 * Math.sin(t * 0.61), y = 0.5 + 0.34 * Math.sin(t * 0.83 + 1.3);
-    const vx = 0.42 * 0.61 * 0.35 * Math.cos(t * 0.61), vy = 0.34 * 0.83 * 0.35 * Math.cos(t * 0.83 + 1.3);
-    splat(x, y, vx * 0.5, vy * 0.5, colorAt(time / 6), 0.022, 0.6, 0.0035);   // the idle brush drifts through the colours too
+
+    function splat(x, y, fx, fy, color, amount, water, radius) {
+      pass(progs.velSplat, vel.write, { uVel: vel.read, uPoint: [x, y], uForce: [fx, fy], uRadius: radius, uAspect: aspect });
+      vel.swap();
+      pass(progs.dyeSplat, dye.write, { uDye: dye.read, uPoint: [x, y], uColor: color, uAmount: amount, uWater: water, uRadius: radius, uAspect: aspect });
+      dye.swap();
+    }
+    let time = 0;
+    // the trail clears in a few seconds; the hero keeps its paint for a long time
+    const CLEAN = trail ? 0.45 : 0.992;
+    function step(dt) {
+      pass(progs.velStep, vel.write, { uVel: vel.read, uDt: dt, uTime: time });
+      vel.swap();
+      pass(progs.dyeStep, dye.write, { uDye: dye.read, uVel: vel.read, uTexel: [1 / simW, 1 / simH], uDt: dt, uClean: CLEAN });
+      dye.swap();
+    }
+    function render() {
+      pass(progs.display, null, { uDye: dye.read, uTexel: [1 / simW, 1 / simH], uPaper: PAPER });
+    }
+
+    /* ---------- Input: the brush -------------------------------------------- */
+    let colorIndex = (Math.random() * PALETTE.length) | 0;
+    let pointer = null, lastInput = -1e9;
+    const queue = [];
+    function onMove(e) {
+      const r = canvas.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width, y = 1 - (e.clientY - r.top) / r.height;
+      if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; return; }
+      const now = performance.now();
+      if (!pointer || now - pointer.t > 250) {
+        if (now - lastInput > 600) colorIndex = (colorIndex + 1) % PALETTE.length; // a pause starts a new colour
+        pointer = { x, y, t: now };
+      } else {
+        queue.push({ x0: pointer.x, y0: pointer.y, x1: x, y1: y, dt: Math.max((now - pointer.t) / 1000, 1 / 240) });
+        pointer = { x, y, t: now };
+      }
+      lastInput = now;
+      wake();
+    }
+    host.addEventListener("pointermove", onMove, { passive: true });
+    if (!trail) {
+      host.addEventListener("pointerdown", (e) => {
+        onMove(e);
+        if (!pointer) return;
+        colorIndex = (colorIndex + 1) % PALETTE.length;
+        splat(pointer.x, pointer.y, 0, 0, PALETTE[colorIndex], 0.55, 1, 0.006); // a tap drops a bloom
+      }, { passive: true });
+    }
+    host.addEventListener("pointerleave", () => { pointer = null; });
+    // the trail canvas stays on screen while the page scrolls: don't draw a line across the scroll
+    if (trail) addEventListener("scroll", () => { pointer = null; }, { passive: true });
+
+    function drainQueue() {
+      let budget = 16;
+      while (queue.length && budget > 0) {
+        const s = queue.shift();
+        const dx = (s.x1 - s.x0) * aspect, dy = s.y1 - s.y0;
+        const dist = Math.hypot(dx, dy);
+        const speed = dist / s.dt;
+        const steps = Math.min(8, Math.max(1, Math.ceil(dist / 0.01)));
+        const fx = Math.max(-1.4, Math.min(1.4, (s.x1 - s.x0) / s.dt)) * 0.35;
+        const fy = Math.max(-1.4, Math.min(1.4, (s.y1 - s.y0) / s.dt)) * 0.35;
+        const amount = (0.11 * Math.max(0.35, Math.min(1, 1.3 - speed * 0.35))) / Math.sqrt(steps);
+        for (let k = 1; k <= steps; k++) {
+          const t = k / steps;
+          splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, PALETTE[colorIndex], amount, 0.85, trail ? 0.0034 : 0.0026);
+          budget--;
+        }
+      }
+      if (queue.length > 48) queue.splice(0, queue.length - 48); // never lag far behind the hand
+    }
+
+    /* ---------- Opening blooms + idle brush (hero only) --------------------- */
+    const intro = trail ? [] : [
+      { at: 0.15, x: 0.18, y: 0.7, c: 0, r: 0.016 },
+      { at: 0.45, x: 0.78, y: 0.78, c: 1, r: 0.012 },
+      { at: 0.8, x: 0.62, y: 0.42, c: 2, r: 0.014 },
+      { at: 1.15, x: 0.35, y: 0.3, c: 4, r: 0.01 },
+      { at: 1.5, x: 0.9, y: 0.35, c: 3, r: 0.011 },
+      { at: 1.9, x: 0.08, y: 0.25, c: 0, r: 0.009 },
+    ];
+    function runIntro() {
+      while (intro.length && intro[0].at <= time) {
+        const b = intro.shift();
+        const jitter = () => (Math.random() - 0.5) * 0.08;
+        splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % PALETTE.length], 0.42, 1, b.r);
+        splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % PALETTE.length], 0.22, 1, b.r * 0.45);
+      }
+    }
+    function idleBrush(now) {
+      if (trail || reduce || now - lastInput < 3500 || intro.length) return;
+      const t = time * 0.35;
+      const x = 0.5 + 0.42 * Math.sin(t * 0.61), y = 0.5 + 0.34 * Math.sin(t * 0.83 + 1.3);
+      const vx = 0.42 * 0.61 * 0.35 * Math.cos(t * 0.61), vy = 0.34 * 0.83 * 0.35 * Math.cos(t * 0.83 + 1.3);
+      splat(x, y, vx * 0.5, vy * 0.5, PALETTE[Math.floor(time / 6) % PALETTE.length], 0.022, 0.6, 0.0035);
+    }
+
+    /* ---------- Loop -------------------------------------------------------- */
+    let raf = 0, last = 0, visible = true;
+    function frame(now) {
+      raf = 0;
+      const dt = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      time += dt;
+      runIntro();
+      drainQueue();
+      idleBrush(now);
+      step(dt);
+      render();
+      // the hero keeps its idle brush going; the trail sleeps once it has faded
+      const keepGoing = trail ? now - lastInput < 7000 : !reduce || intro.length || now - lastInput < 4000;
+      if (keepGoing && visible && !document.hidden) raf = requestAnimationFrame(frame);
+    }
+    function wake() {
+      if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    }
+
+    resize();
+    if (reduce && !trail) {
+      // Still image: let the opening blooms settle off-screen, then draw once.
+      intro.forEach((b) => (b.at = 0));
+      runIntro();
+      for (let k = 0; k < 120; k++) step(1 / 30);
+      render();
+    } else {
+      render();
+      if (!trail) wake();
+    }
+
+    new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible && !trail) wake(); }).observe(host);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && !trail) wake(); });
+    let rt = 0;
+    addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { resize(); render(); wake(); }, 150); });
+    canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); cancelAnimationFrame(raf); canvas.style.visibility = "hidden"; });
+    return true;
   }
 
-  /* ---------- Loop ---------------------------------------------------------- */
-  let raf = 0, last = 0, visible = true;
-  function frame(now) {
-    raf = 0;
-    const dt = Math.min((now - last) / 1000, 1 / 30);
-    last = now;
-    time += dt;
-    runIntro();
-    drainQueue();
-    idleBrush(now);
-    step(dt);
-    render();
-    const keepGoing = !reduce || intro.length || now - lastInput < 4000;
-    if (keepGoing && visible && !document.hidden) raf = requestAnimationFrame(frame);
-  }
-  function wake() {
-    if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); }
-  }
+  /* the hero */
+  const hero = document.querySelector(".hero");
+  const heroCanvas = hero && hero.querySelector(".paint-canvas");
+  if (heroCanvas) hero.classList.add(createPaint(hero, heroCanvas) ? "has-paint" : "no-paint");
 
-  resize();
-  if (reduce) {
-    // Still image: let the opening blooms settle off-screen, then draw once.
-    intro.forEach((b) => (b.at = 0));
-    runIntro();
-    for (let k = 0; k < 120; k++) step(1 / 30);
-    render();
-  } else {
-    wake();
+  /* behind the works: a trail for mouse users only */
+  const work = document.querySelector(".work");
+  const trailCanvas = work && work.querySelector(".trail-canvas");
+  if (trailCanvas && !reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    work.classList.add("has-trail");                               // shown first, so the canvas has a size to measure
+    if (!createPaint(work, trailCanvas, { trail: true })) work.classList.remove("has-trail");
   }
-
-  new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) wake(); }).observe(hero);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) wake(); });
-  let rt = 0;
-  addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { resize(); render(); wake(); }, 150); });
-  canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); cancelAnimationFrame(raf); hero.classList.replace("has-paint", "no-paint"); });
 })();
