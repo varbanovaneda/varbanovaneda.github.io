@@ -67,6 +67,20 @@
       ${g.caption ? `<figcaption class="label">${esc(g.caption)}</figcaption>` : ""}
     </figure>`).join("");
 
+  /* A sideways-scrolling strip of extra views (p.scroll in content.js). */
+  const S2 = p.scroll && p.scroll.items && p.scroll.items.length ? p.scroll : null;
+  const strip = S2 ? `
+    <section class="p-scroll" aria-label="${esc(S2.label || "More views")}">
+      <div class="p-scroll-head label"><span>${esc(S2.label || "More views")}</span><span class="muted" aria-hidden="true">Scroll sideways →</span></div>
+      <div class="p-scroll-track" tabindex="0" data-lenis-prevent>
+        ${S2.items.map((g, n) => `
+          <figure class="p-scroll-item">
+            <div class="p-scroll-media">${imgTag(g.image, { sizes: "(max-width: 640px) 90vw, 60vw", alt: (g.image && g.image.alt) || `${p.title} — view ${n + 1}` })}</div>
+            ${g.caption ? `<figcaption class="label">${esc(g.caption)}</figcaption>` : ""}
+          </figure>`).join("")}
+      </div>
+    </section>` : "";
+
   const more = siblings.length > 1 ? `
     <section class="p-siblings" aria-labelledby="siblings-title">
       <h2 class="label" id="siblings-title">More from ${esc(series.title)}</h2>
@@ -92,6 +106,8 @@
       </header>
 
       <figure class="p-cover"><div class="p-cover-frame" data-shared style="--ratio:${cw} / ${ch};--r:${(cw / ch).toFixed(4)}">${imgTag(p.cover, { sizes: "100vw", alt: p.title, eager: true })}</div></figure>
+
+      ${strip}
 
       ${overview}
 
@@ -126,6 +142,24 @@
   else setTimeout(() => { if (!userScrolled) frameArtwork("smooth"); }, 450);
   // Web fonts can change the title's height; re-frame if the visitor hasn't moved yet.
   document.fonts?.ready.then(() => { if (instant && !userScrolled) frameArtwork("instant"); });
+
+  const track = $(".p-scroll-track");
+  if (track) {
+    // one notch of the wheel glides to the next (or previous) artwork; at either end the page scrolls on
+    let busy = 0;
+    track.addEventListener("wheel", (e) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;                    // a trackpad already scrolls sideways
+      const max = track.scrollWidth - track.clientWidth;
+      const dir = Math.sign(e.deltaY);
+      if (!dir || (dir > 0 && track.scrollLeft >= max - 2) || (dir < 0 && track.scrollLeft <= 2)) return;
+      e.preventDefault();
+      const now = performance.now();
+      if (now < busy) return;
+      busy = now + 650;
+      const step = (track.querySelector(".p-scroll-item") || track).getBoundingClientRect().width;
+      track.scrollBy({ left: dir * step, behavior: reduce ? "auto" : "smooth" });
+    }, { passive: false });
+  }
 
   /* ← / → to move between works. */
   addEventListener("keydown", (e) => {

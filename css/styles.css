@@ -11,8 +11,8 @@
   --fg: var(--black);
   --status: #3fd47f;
 
-  --font-display: "Fira Sans Extra Condensed", "Arial Narrow", "Helvetica Neue", sans-serif; /* has Cyrillic */
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;   /* wide headlines; has Cyrillic */
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   --gutter: clamp(16px, 2.6vw, 44px);
   --section: clamp(104px, 14vw, 224px);
@@ -66,10 +66,9 @@ h1, h2, h3, p { margin: 0; }
 /* ---------- Type ---------------------------------------------------------- */
 .display {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 66%;
-  line-height: 0.86;
-  letter-spacing: -0.012em;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
 }
 .label {
@@ -119,7 +118,7 @@ h1, h2, h3, p { margin: 0; }
 .nav.is-hidden:not(:focus-within) { transform: translateY(-120%); }
 .nav a { pointer-events: auto; }
 .nav-logo {
-  font-family: var(--font-display); font-weight: 800; font-stretch: 72%;
+  font-family: var(--font-display); font-weight: 700;
   font-size: clamp(1.125rem, 1.4vw, 1.375rem); letter-spacing: 0; text-transform: uppercase;
   display: inline-flex; align-items: center;
   transition: opacity 0.4s var(--ease-out);
@@ -163,7 +162,7 @@ h1, h2, h3, p { margin: 0; }
   padding: 120px var(--gutter) clamp(24px, 3vw, 44px);
 }
 .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: auto; }
-.hero-title { font-size: clamp(4rem, 17vw, 21rem); line-height: 0.82; letter-spacing: -0.015em; margin-top: 40px; }
+.hero-title { font-size: clamp(2.5rem, 11.4vw, 13rem); line-height: 0.82; letter-spacing: -0.015em; margin-top: 40px; }
 .hl { display: block; overflow: hidden; padding-bottom: 0.03em; margin-bottom: -0.03em; }
 .hl-in { display: inline-block; }
 .js .hl-in { transform: translateY(108%); }
@@ -208,7 +207,7 @@ html:not(.has-paint) .paint-hint { display: none; }
 /* ---------- Film grain + vignette -----------------------------------------
    They sit just above the page background and text (z-index 1) but below the
    artwork (z-index 2), so the paintings themselves stay clean. */
-.card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media { position: relative; z-index: 2; }
+.card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media, .p-scroll-media { position: relative; z-index: 2; }
 .grain {
   position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.55;
   background-size: 160px 160px; animation: grain 0.9s steps(6) infinite;
@@ -254,7 +253,7 @@ html:not(.has-paint) .paint-hint { display: none; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
   padding: 0 var(--gutter); margin-bottom: clamp(40px, 6vw, 96px);
 }
-.work-title { font-size: clamp(3rem, 8vw, 9rem); display: flex; align-items: flex-start; gap: 0.12em; }
+.work-title { font-size: clamp(1.75rem, 5.4vw, 6.25rem); display: flex; align-items: flex-start; gap: 0.12em; }
 .work-count { font: 500 clamp(0.875rem, 1.2vw, 1.125rem)/1 var(--font-body); letter-spacing: 0; opacity: 0.55; margin-top: 0.3em; }
 
 .view-toggle {
@@ -286,9 +285,9 @@ html:not(.has-paint) .paint-hint { display: none; }
   border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
 }
 .series-head { align-items: start; }
-.series-num { grid-column: 1 / span 2; font-size: clamp(2.25rem, 5.4vw, 5.75rem); opacity: 0.22; }
+.series-num { grid-column: 1 / span 2; font-size: clamp(1.75rem, 3.8vw, 4.25rem); opacity: 0.22; }
 .series-heading { grid-column: 3 / span 5; }
-.series-title { font-size: clamp(2.25rem, 4.6vw, 5rem); text-wrap: balance; }
+.series-title { font-size: clamp(1.375rem, 2.7vw, 3rem); text-wrap: balance; }
 .series-subtitle { margin-top: 14px; font-size: clamp(1rem, 1.25vw, 1.25rem); letter-spacing: -0.01em; opacity: 0.7; }
 .series-body { grid-column: 9 / -1; max-width: 46ch; }
 .series-meta { margin: 0 0 18px; display: grid; gap: 10px; }
@@ -339,11 +338,11 @@ html:not(.has-paint) .paint-hint { display: none; }
 }
 .card-num { opacity: 0.5; font-variant-numeric: tabular-nums; }
 .card-title {
-  font-family: var(--font-display); font-weight: 800; font-stretch: 70%;
-  font-size: clamp(1.5rem, 2.3vw, 2.5rem); line-height: 0.95; letter-spacing: 0; text-transform: uppercase;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(0.95rem, 1.35vw, 1.45rem); line-height: 1.05; letter-spacing: -0.02em; text-transform: uppercase;
   display: inline-flex; align-items: flex-start; gap: 0.2em;
 }
-.card-item[data-wide] .card-title { font-size: clamp(1.625rem, 3vw, 3.25rem); }
+.card-item[data-wide] .card-title { font-size: clamp(1.1rem, 1.9vw, 2.1rem); }
 .card-arrow {
   font-family: var(--font-body); font-weight: 400; font-size: 0.5em; line-height: 1;
   opacity: 0; transform: translate(-6px, 6px); transition: opacity 0.4s var(--ease-out), transform 0.6s var(--ease-out);
@@ -372,8 +371,8 @@ html:not(.has-cursor) .card-cta {
 }
 .index-row:active { opacity: 0.6; }
 .ir-title {
-  font-family: var(--font-display); font-weight: 800; font-stretch: 66%; text-transform: uppercase;
-  font-size: clamp(1.75rem, 4.6vw, 5rem); line-height: 0.9;
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
+  font-size: clamp(1.15rem, 2.7vw, 2.9rem); line-height: 1;
   transition: transform 0.7s var(--ease-out);
 }
 .ir-num, .ir-cat, .ir-client, .ir-year { opacity: 0.55; }
@@ -397,7 +396,7 @@ html:not(.has-cursor) .card-cta {
 .ticker { overflow: hidden; padding: clamp(24px, 4vw, 64px) 0; white-space: nowrap; user-select: none; }
 .ticker-track {
   display: inline-block; will-change: transform; transform: translate3d(-25%, 0, 0);
-  font-family: var(--font-display); font-weight: 800; font-stretch: 66%; text-transform: uppercase;
+  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
   font-size: clamp(4.5rem, 16vw, 19rem); line-height: 0.82; letter-spacing: -0.01em;
 }
 .ticker-track span { padding-right: 0.25em; }
@@ -518,7 +517,7 @@ html:not(.has-cursor) .card-cta {
 .p-topline { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(28px, 4vw, 64px); }
 .back-link { display: inline-flex; align-items: center; gap: 8px; }
 .back-link:active { opacity: 0.6; }
-.p-title { font-size: clamp(3.5rem, 14vw, 16rem); overflow-wrap: anywhere; }
+.p-title { font-size: clamp(2rem, 7.2vw, 8.5rem); overflow-wrap: anywhere; }
 .p-meta {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px var(--gutter);
   margin: clamp(36px, 4.5vw, 72px) 0 0; padding-top: 16px;
@@ -536,6 +535,23 @@ html:not(.has-cursor) .card-cta {
   background: color-mix(in srgb, currentColor 5%, transparent);
 }
 .p-cover img { width: 100%; height: 100%; object-fit: contain; }
+
+/* sideways-scrolling strip of extra views on a work's page */
+.p-scroll { padding: clamp(48px, 6vw, 96px) 0 0; }
+.p-scroll-head { display: flex; justify-content: space-between; gap: 16px; padding: 0 var(--gutter) 18px; }
+.p-scroll-track {
+  display: flex; gap: var(--gutter); overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter); padding: 0 var(--gutter) 18px;
+  scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--black) 30%, transparent) transparent;
+}
+.p-scroll-item { flex: 0 0 min(78vw, 1040px); margin: 0; scroll-snap-align: start; }
+.p-scroll-media {
+  height: min(80vh, 820px); border-radius: var(--radius); overflow: hidden;
+  background: #fff;   /* the illustrations are drawn on white */
+}
+.p-scroll-media img { width: 100%; height: 100%; object-fit: contain; }
+.p-scroll-item figcaption { margin-top: 12px; opacity: 0.6; }
+@media (max-width: 640px) { .p-scroll-item { flex-basis: 88vw; } .p-scroll-media { height: 62vh; } }
 
 .p-overview {
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px var(--gutter);
@@ -576,7 +592,7 @@ html:not(.has-cursor) .card-cta {
 
 .p-next { display: block; padding: clamp(40px, 5vw, 80px) var(--gutter) var(--section); border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
 .p-next-top { display: flex; justify-content: space-between; margin-bottom: clamp(24px, 3vw, 48px); }
-.p-next-title { font-size: clamp(3rem, 11vw, 12rem); transition: transform 0.8s var(--ease-out); }
+.p-next-title { font-size: clamp(1.75rem, 5.8vw, 6.5rem); transition: transform 0.8s var(--ease-out); }
 .p-next-media { position: relative; border-radius: var(--radius); margin-top: clamp(28px, 3.5vw, 56px); aspect-ratio: 2.4 / 1; max-width: 1100px; overflow: hidden; background: color-mix(in srgb, var(--black) 6%, var(--white)); transition: transform 0.6s var(--ease-out); }
 .p-next-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out), opacity 0.9s var(--ease-out); }
 .p-next:active .p-next-media { transform: scale(0.99); transition-duration: 0.12s; }
@@ -586,7 +602,7 @@ html:not(.has-cursor) .card-cta {
 }
 
 .not-found { min-height: 80svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 32px; padding: 140px var(--gutter) 64px; }
-.not-found h1 { font-size: clamp(3.5rem, 14vw, 14rem); }
+.not-found h1 { font-size: clamp(2rem, 8vw, 8rem); }
 
 /* Images fade in once decoded; failed images leave the neutral frame. */
 .js img[loading] { opacity: 0; }
@@ -627,7 +643,7 @@ img.is-error { visibility: hidden; }
   .nav-link { font-size: 0.75rem; }
   .hero { padding-top: 104px; }
   .hero-top { flex-direction: column; gap: 12px; }
-  .hero-title { font-size: 19.5vw; }
+  .hero-title { font-size: 10.6vw; }
   .hero-foot { flex-direction: column; align-items: flex-start; }
   .work-head { flex-direction: column; align-items: flex-start; }
   .series-grid { grid-template-columns: minmax(0, 1fr); }
@@ -635,7 +651,7 @@ img.is-error { visibility: hidden; }
   .card-item:only-child { grid-column: 1 / -1; }
   .series-head { grid-template-columns: minmax(0, 1fr); }
   .series-num, .series-heading, .series-body { grid-column: 1 / -1; }
-  .series-num { font-size: 2.5rem; margin-bottom: -6px; }
+  .series-num { font-size: 1.75rem; margin-bottom: -6px; }
   .card-meta { grid-template-columns: auto 1fr auto; }
   .card-info { grid-column: auto; text-align: right; }
   .index-row { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 12px; }

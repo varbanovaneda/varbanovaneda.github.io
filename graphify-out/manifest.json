@@ -1,0 +1,62 @@
+{
+  "js/content.js": {
+    "mtime": 1794654577.040706,
+    "seen": 1794654757.892575,
+    "ast_hash": "931e601c444d98ee18e9dfb6afe51009",
+    "semantic_hash": ""
+  },
+  "js/core.js": {
+    "mtime": 1794651298.0639937,
+    "seen": 1794654757.8925803,
+    "ast_hash": "6381cabc54e1fd5f8979aec938a63aab",
+    "semantic_hash": ""
+  },
+  "js/home.js": {
+    "mtime": 1794652243.6040006,
+    "seen": 1794654757.892583,
+    "ast_hash": "7de85e224f6acff96bbd3fd827224888",
+    "semantic_hash": ""
+  },
+  "js/paint.js": {
+    "mtime": 1794652474.456643,
+    "seen": 1794654757.8925846,
+    "ast_hash": "33a5a134b9e131a89508976f92a33a43",
+    "semantic_hash": ""
+  },
+  "js/project.js": {
+    "mtime": 1794654669.886543,
+    "seen": 1794654757.8925858,
+    "ast_hash": "3eccee30d4268585938c048b682e95e1",
+    "semantic_hash": ""
+  },
+  "js/scene.js": {
+    "mtime": 1794649566.1559286,
+    "seen": 1794654757.8925865,
+    "ast_hash": "a79614d8706d6d12efb8ec9117696bc5",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1794650858.6129396,
+    "seen": 1794654757.8925877,
+    "ast_hash": "67d88e9d0760c3ba54c75dfd9551c1c5",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1794513507.6149485,
+    "seen": 1794654757.8925886,
+    "ast_hash": "c53dfbf5286d39a13c0e596541f58a00",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1794654577.118598,
+    "seen": 1794654757.8925893,
+    "ast_hash": "6863fd6ff91d64c1bbb6cc4295e1886b",
+    "semantic_hash": ""
+  },
+  "project.html": {
+    "mtime": 1794654577.1192307,
+    "seen": 1794654757.89259,
+    "ast_hash": "219248fd00e02c1f69f925235db2474d",
+    "semantic_hash": ""
+  }
+}

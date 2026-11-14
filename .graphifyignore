@@ -1,0 +1,4 @@
+# third-party code and tool folders: not part of the website code
+vendor/
+.claude/
+assets/

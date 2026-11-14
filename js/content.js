@@ -128,20 +128,21 @@
       ],
     },
     {
-      id: "puldin", title: "Puldin — Дивите козлета", subtitle: "Logo Design & Marathon T-Shirt", reveal: "sketch", accent: "#5f7040",
+      id: "puldin", title: "Puldin — Дивите козлета", subtitle: "Logo Design & T-Shirt Illustrations", reveal: "sketch", accent: "#5f7040",
       meta: [["Client", "Puldin — Дивите козлета (The Wild Goats)"], ["Project", "Brand Identity / Logo Design / T-shirt Illustration"]],
       text: [
-        "Two projects for Puldin — Дивите козлета (The Wild Goats), a tourism company inspired by the spirit of adventure, nature and mountain exploration: the company’s logo and a commemorative T-shirt for its marathon event.",
+        "Three projects for Puldin — Дивите козлета (The Wild Goats), a tourism company inspired by the spirit of adventure, nature and mountain exploration: the company’s logo, a commemorative T-shirt for its marathon event, and a T-shirt for its trip to the Pyrenees.",
         "For the logo, I combined the silhouette of a goat with a mountain-inspired concept, representing the company’s connection to the mountains and its adventurous character. It was created in both black and white versions, allowing it to adapt to different backgrounds and branding applications while maintaining a strong and recognisable visual identity.",
         "The T-shirt was created to celebrate the tenth season of the marathon. Developed for both children and adults, it reflects the inclusive nature of the event and its invitation for participants of all ages to take part. The illustration translates the energy and spirit of the marathon into a playful, wearable graphic.",
         "The final artwork was produced and featured on the official event T-shirts, creating a shared visual identity for participants across different age groups.",
+        "For the group’s trip to the Pyrenees, I drew a second T-shirt: the animals of the mountains stacked into a playful totem, with the hand-lettered words “Les Pyrénées” winding between them.",
       ],
     },
     {
       id: "robin-identity", title: "Red Beard Studio — Robin Identity", reveal: "sketch", accent: "#b0262c",
       meta: [["Client", "Red Beard Studio"], ["Project", "Logo Design / Brand Applications"]],
       text: [
-        "A logo designed for RB Studio, a catering studio named after the robin bird, whose work brings together food, fashion and visual culture.",
+        "A logo designed for RB Studio (Red Beard Studio), a catering studio named after the robin bird, whose work brings together food, fashion and visual culture. The studio is closely connected to Robin, the café and bakery featured in the next two projects, so the same robin carries through all of this work.",
         "The mark is a loose, brush-drawn robin with the letters R and B doodled into the bird itself, so that the studio’s initials and its namesake form a single image. The hand-drawn line gives the identity a personal, handmade character.",
         "The logo is used across brand applications, including stickers and logo placements, helping establish a distinctive and versatile visual presence.",
       ],
@@ -222,11 +223,29 @@
 
     /* 04 Puldin — Дивите козлета */
     {
-      slug: "puldin-10th-season", series: "puldin", span: 6, lang: "bg", title: "Дивите козлета", category: "T-shirt design",
+      slug: "puldin-10th-season", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "T-shirt design",
       summary: "Ten seasons in love with the mountains.",
       cover: img("divite-kozleta.jpg", 1336, 1280, "Three cartoon goats with backpacks in front of pine trees, with the text Divite kozleta, 10 seasons in love with the mountains"),
     },
-    { slug: "wild-goats-logo", series: "puldin", span: 6, lang: "bg", title: "Дивите козлета", category: "Logo", cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape") },
+    { slug: "wild-goats-logo", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "Logo", cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape") },
+
+    {
+      slug: "puldin-pyrenees", series: "puldin", span: 4, title: "Les Pyrénées", category: "T-shirt design",
+      summary: "A T-shirt for the Wild Goats’ trip to the Pyrenees.",
+      description: [
+        "A T-shirt design for Puldin — Дивите козлета’s trip to the Pyrenees. The animals of the mountains are stacked into a playful totem: a sheep, a goat with its bell, a marmot and a fluffy white mountain dog, with the hand-lettered words “Les Pyrénées” winding between them.",
+        "A second version sets the same characters against hand-drawn peaks, bringing the mountains themselves into the design.",
+      ],
+      cover: img("pyrenees.jpg", 1200, 1600, "A sheep, a goat with a bell, a marmot and a white mountain dog stacked around the green lettering Les Pyrénées"),
+      // shown only on this work's own page, as a sideways-scrolling strip
+      scroll: {
+        label: "Les Pyrénées — two versions",
+        items: [
+          { image: img("pyrenees.jpg", 1200, 1600, "The Les Pyrénées T-shirt design"), caption: "The T-shirt design" },
+          { image: img("pyrenees-mountain.jpg", 1200, 1600, "The same animals and lettering in front of hand-drawn mountain peaks"), caption: "With the mountains" },
+        ],
+      },
+    },
 
     /* 05 Red Beard Studio — Robin Identity */
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },
