@@ -747,6 +747,6 @@
   window.Site = {
     $, $$, esc, pad, clamp, projectUrl, roll, socialsHTML,
     Spring, schedule, imgTag, bindImages, initReveals,
-    reduceMotion, finePointer, mountChrome, init, lenis: null,
+    reduceMotion, finePointer, mountChrome, init, lenis: null, stainCanvas,
   };
 })();

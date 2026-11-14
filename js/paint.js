@@ -1,9 +1,8 @@
 /* ==========================================================================
-   Living watercolour — a small WebGL simulation used in two places:
-   • the hero: paint on the paper by moving the mouse (or swiping); opening
-     blooms, and a slow idle brush when you stop;
-   • behind the works: the cursor leaves a watercolour trail that fades away.
-   Pigment is stored as absorbance and rendered with Beer–Lambert over paper,
+   Living watercolour — the whole page sits on one sheet of watercolour paper.
+   Move the mouse (or swipe) anywhere to paint; the strokes scroll with the
+   page, slowly dry and fade. Opening blooms and a slow idle brush live in
+   the hero, at the top of the page. A small WebGL simulation: pigment is stored as absorbance and rendered with Beer–Lambert over paper,
    so colours layer subtractively like real washes. Water spreads pigment
    while wet, then evaporates; edges darken where pigment pools.
    Colours: SITE.theme.paper and SITE.theme.washes in content.js.
@@ -29,10 +28,11 @@
   float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   `;
   const VEL_STEP = `
-  uniform sampler2D uVel; uniform float uDt; uniform float uTime;
+  uniform sampler2D uVel; uniform float uDt; uniform float uTime; uniform vec2 uShift;
   void main(){
-    vec2 v = dec(texture(uVel, vUv));
-    vec2 a = dec(texture(uVel, vUv - v * uDt));
+    vec2 q = vUv - uShift;                                                    // follow the page as it scrolls
+    vec2 v = dec(texture(uVel, q));
+    vec2 a = dec(texture(uVel, q - v * uDt)) * step(0.0, q.y) * step(q.y, 1.0);
     float t = uTime * 0.12;
     vec2 drift = vec2(sin(vUv.y * 5.0 + t * 3.0) + 0.5 * sin(vUv.y * 13.0 - t * 2.0),
                       cos(vUv.x * 4.0 - t * 2.5) + 0.5 * cos(vUv.x * 11.0 + t * 1.7)) * 0.012;
@@ -48,13 +48,14 @@
     outColor = enc(v);
   }`;
   const DYE_STEP = `
-  uniform sampler2D uDye; uniform sampler2D uVel; uniform vec2 uTexel; uniform float uDt; uniform float uClean;
+  uniform sampler2D uDye; uniform sampler2D uVel; uniform vec2 uTexel; uniform float uDt; uniform float uClean; uniform vec2 uShift;
   void main(){
     vec2 v = dec(texture(uVel, vUv));
-    vec2 p = vUv - v * uDt;
-    vec4 c = texture(uDye, p);
+    vec2 p = vUv - uShift - v * uDt;                                          // follow the page as it scrolls
+    float inside = step(0.0, p.y) * step(p.y, 1.0);                           // new paper scrolling in is clean
+    vec4 c = texture(uDye, p) * inside;
     vec4 n = (texture(uDye, p + vec2(uTexel.x, 0.0)) + texture(uDye, p - vec2(uTexel.x, 0.0)) +
-              texture(uDye, p + vec2(0.0, uTexel.y)) + texture(uDye, p - vec2(0.0, uTexel.y))) * 0.25;
+              texture(uDye, p + vec2(0.0, uTexel.y)) + texture(uDye, p - vec2(0.0, uTexel.y))) * 0.25 * inside;
     float f = clamp(uDt * 30.0, 0.0, 2.0);
     float wet = max(c.a, n.a);
     c.rgb = mix(c.rgb, n.rgb, clamp((0.008 + 0.2 * wet) * f, 0.0, 0.9));    // pigment moves while wet
@@ -94,9 +95,7 @@
     outColor = vec4(col, 1.0);
   }`;
 
-  /* host: the element that receives the pointer; canvas: where the paint is drawn.
-     trail: a fading cursor trail (no opening blooms, no idle brush). */
-  function createPaint(host, canvas, { trail = false } = {}) {
+  function createPaint(canvas) {
     const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: "high-performance" });
     if (!gl) return false;
 
@@ -168,7 +167,7 @@
 
     function resize() {
       const r = canvas.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio || 1, trail ? 1 : 1.5);
+      const dpr = Math.min(devicePixelRatio || 1, 1.25);
       const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       aspect = r.width / Math.max(1, r.height);
@@ -204,12 +203,11 @@
       dye.swap();
     }
     let time = 0;
-    // the trail clears in a few seconds; the hero keeps its paint for a long time
-    const CLEAN = trail ? 0.45 : 0.992;
-    function step(dt) {
-      pass(progs.velStep, vel.write, { uVel: vel.read, uDt: dt, uTime: time });
+    const CLEAN = 0.975;                                                       // strokes fade over half a minute or so
+    function step(dt, shift = 0) {
+      pass(progs.velStep, vel.write, { uVel: vel.read, uDt: dt, uTime: time, uShift: [0, shift] });
       vel.swap();
-      pass(progs.dyeStep, dye.write, { uDye: dye.read, uVel: vel.read, uTexel: [1 / simW, 1 / simH], uDt: dt, uClean: CLEAN });
+      pass(progs.dyeStep, dye.write, { uDye: dye.read, uVel: vel.read, uTexel: [1 / simW, 1 / simH], uDt: dt, uClean: CLEAN, uShift: [0, shift] });
       dye.swap();
     }
     function render() {
@@ -235,18 +233,14 @@
       lastInput = now;
       wake();
     }
-    host.addEventListener("pointermove", onMove, { passive: true });
-    if (!trail) {
-      host.addEventListener("pointerdown", (e) => {
-        onMove(e);
-        if (!pointer) return;
-        colorIndex = (colorIndex + 1) % PALETTE.length;
-        splat(pointer.x, pointer.y, 0, 0, PALETTE[colorIndex], 0.55, 1, 0.006); // a tap drops a bloom
-      }, { passive: true });
-    }
-    host.addEventListener("pointerleave", () => { pointer = null; });
-    // the trail canvas stays on screen while the page scrolls: don't draw a line across the scroll
-    if (trail) addEventListener("scroll", () => { pointer = null; }, { passive: true });
+    addEventListener("pointermove", onMove, { passive: true });
+    addEventListener("pointerdown", (e) => {
+      onMove(e);
+      if (!pointer) return;
+      colorIndex = (colorIndex + 1) % PALETTE.length;
+      splat(pointer.x, pointer.y, 0, 0, PALETTE[colorIndex], 0.55, 1, 0.006); // a tap drops a bloom
+    }, { passive: true });
+    document.documentElement.addEventListener("pointerleave", () => { pointer = null; });
 
     function drainQueue() {
       let budget = 48;                                                          // enough to catch up with a fast hand in one frame
@@ -261,15 +255,16 @@
         const amount = (0.11 * Math.max(0.35, Math.min(1, 1.3 - speed * 0.35))) / Math.sqrt(steps);
         for (let k = 1; k <= steps; k++) {
           const t = k / steps;
-          splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, PALETTE[colorIndex], amount, 0.85, trail ? 0.0034 : 0.0026);
+          splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, PALETTE[colorIndex], amount, 0.85, 0.0026);
           budget--;
         }
       }
       if (queue.length > 48) queue.splice(0, queue.length - 48); // never lag far behind the hand
     }
 
-    /* ---------- Opening blooms + idle brush (hero only) --------------------- */
-    const intro = trail ? [] : [
+    /* ---------- Opening blooms + idle brush (at the top of the page) ------- */
+    const atTop = () => scrollY < innerHeight * 0.3;
+    const intro = scrollY > innerHeight ? [] : [
       { at: 0.15, x: 0.18, y: 0.7, c: 0, r: 0.016 },
       { at: 0.45, x: 0.78, y: 0.78, c: 1, r: 0.012 },
       { at: 0.8, x: 0.62, y: 0.42, c: 2, r: 0.014 },
@@ -286,7 +281,7 @@
       }
     }
     function idleBrush(now) {
-      if (trail || reduce || now - lastInput < 3500 || intro.length) return;
+      if (reduce || !atTop() || now - lastInput < 3500 || intro.length) return;
       const t = time * 0.35;
       const x = 0.5 + 0.42 * Math.sin(t * 0.61), y = 0.5 + 0.34 * Math.sin(t * 0.83 + 1.3);
       const vx = 0.42 * 0.61 * 0.35 * Math.cos(t * 0.61), vy = 0.34 * 0.83 * 0.35 * Math.cos(t * 0.83 + 1.3);
@@ -294,27 +289,30 @@
     }
 
     /* ---------- Loop -------------------------------------------------------- */
-    let raf = 0, last = 0, visible = true;
+    let raf = 0, last = 0, lastY = scrollY, lastScroll = -1e9;
     function frame(now) {
       raf = 0;
       const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
       time += dt;
+      const y = scrollY, shift = (y - lastY) / Math.max(1, canvas.clientHeight);
+      lastY = y;
       runIntro();
       drainQueue();
       idleBrush(now);
-      step(dt);
+      step(dt, shift);
       render();
-      // the hero keeps its idle brush going; the trail sleeps once it has faded
-      const keepGoing = trail ? now - lastInput < 7000 : !reduce || intro.length || now - lastInput < 4000;
-      if (keepGoing && visible && !document.hidden) raf = requestAnimationFrame(frame);
+      // keep going while something moves: the idle brush, a fresh stroke drying, or the page scrolling
+      const keepGoing = intro.length || now - lastInput < 4000 || now - lastScroll < 1200 || (!reduce && atTop());
+      if (keepGoing && !document.hidden) raf = requestAnimationFrame(frame);
     }
     function wake() {
-      if (!raf && visible && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); }
+      if (!raf && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(frame); }
     }
+    addEventListener("scroll", () => { lastScroll = performance.now(); wake(); }, { passive: true });
 
     resize();
-    if (reduce && !trail) {
+    if (reduce) {
       // Still image: let the opening blooms settle off-screen, then draw once.
       intro.forEach((b) => (b.at = 0));
       runIntro();
@@ -322,27 +320,21 @@
       render();
     } else {
       render();
-      if (!trail) wake();
+      wake();
     }
 
-    new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible && !trail) wake(); }).observe(host);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden && !trail) wake(); });
+    document.addEventListener("visibilitychange", () => wake());
     let rt = 0;
     addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { resize(); render(); wake(); }, 150); });
-    canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); cancelAnimationFrame(raf); canvas.style.visibility = "hidden"; });
+    canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); cancelAnimationFrame(raf); canvas.style.visibility = "hidden"; document.documentElement.classList.remove("has-paint"); });
     return true;
   }
 
-  /* the hero */
-  const hero = document.querySelector(".hero");
-  const heroCanvas = hero && hero.querySelector(".paint-canvas");
-  if (heroCanvas) hero.classList.add(createPaint(hero, heroCanvas) ? "has-paint" : "no-paint");
-
-  /* behind the works: a trail for mouse users only */
-  const work = document.querySelector(".work");
-  const trailCanvas = work && work.querySelector(".trail-canvas");
-  if (trailCanvas && !reduce && matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    work.classList.add("has-trail");                               // shown first, so the canvas has a size to measure
-    if (!createPaint(work, trailCanvas, { trail: true })) work.classList.remove("has-trail");
-  }
+  /* one canvas behind the whole page */
+  const canvas = document.createElement("canvas");
+  canvas.className = "paint-canvas";
+  canvas.setAttribute("aria-hidden", "true");
+  document.body.prepend(canvas);
+  if (createPaint(canvas)) document.documentElement.classList.add("has-paint");
+  else canvas.remove();
 })();

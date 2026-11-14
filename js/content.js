@@ -37,8 +37,6 @@
 
     availability: { available: true, label: "Available for projects and work" },
 
-    loader: { label: "Neda Varbanova — Portfolio" },
-
     /* 1. HERO */
     hero: {
       lines: ["Neda", "Varbanova"],                  // one entry per line of the big headline

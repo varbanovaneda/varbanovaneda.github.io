@@ -15,13 +15,12 @@
   const status = () =>
     `<span class="status label${S.availability.available ? "" : " is-off"}"><span class="status-dot" aria-hidden="true"></span>${esc(S.availability.label)}</span>`;
 
-  /* The stage holds the hero; its background is the living watercolour (paint.js). */
+  /* The hero. The whole page sits on one living watercolour canvas (paint.js). */
   function heroHTML() {
     const H = S.hero;
     return `
       <div class="stage" id="top">
         <section class="hero" data-tone="light" aria-label="Introduction">
-          <canvas class="paint-canvas" aria-hidden="true"></canvas>
           <div class="hero-top">
             <p class="hero-kicker label" data-intro style="--d:.5s">${esc(H.kicker || S.role)} — ${esc(S.location)}</p>
             <div class="hero-status" data-intro style="--d:.6s">${status()}</div>
@@ -37,49 +36,28 @@
       </div>`;
   }
 
-  /* Loading screen: the counter follows real work (the fonts),
-     never runs shorter than ~1.2s, then the paper lifts and the headline rises.
+  /* Opening: the page starts as blank paper and a whitish watercolour splash
+     spreads from the middle to reveal the painted page; then the headline rises.
      Skipped when arriving from another page of this site. */
-  function loaderHTML() {
-    return `
-      <div class="loader" aria-hidden="true">
-        <span class="loader-label label">${esc((S.loader && S.loader.label) || S.name)}</span>
-        <span class="loader-num display">000</span>
-        <span class="loader-bar"><span class="loader-fill"></span></span>
-      </div>`;
-  }
-
   function intro() {
     const root = document.documentElement;
     const reveal = () => { root.classList.remove("is-loading"); $(".hero").classList.add("is-in"); window.Site.lenis && window.Site.lenis.start(); };
     const internal = document.referrer && new URL(document.referrer, location.href).origin === location.origin;
     if (internal) { reveal(); return; }
 
-    main.insertAdjacentHTML("beforebegin", loaderHTML());
-    const loader = $(".loader"), num = $(".loader-num", loader), fill = $(".loader-fill", loader);
+    main.insertAdjacentHTML("beforebegin", '<div class="splash" aria-hidden="true"></div>');
+    const splash = $(".splash");
+    try { splash.style.setProperty("--splash", `url(${window.Site.stainCanvas((Math.random() * 1e9) | 0)})`); } catch {}
     root.classList.add("is-loading");
     window.Site.lenis && window.Site.lenis.stop();
-    let fonts = 0, done = false;
-    document.fonts ? document.fonts.ready.then(() => (fonts = 1)) : (fonts = 1);
-    const t0 = performance.now(), MIN = reduceMotion.matches ? 0 : 1200, MAX = 6000;
-    let shown = 0, last = t0;
-    const step = (now) => {
-      const dt = (now - last) / 1000; last = now;
-      const elapsed = now - t0;
-      const real = fonts;
-      const target = Math.min(elapsed >= MAX ? 1 : real, MIN ? elapsed / MIN : 1) * 100;
-      shown = reduceMotion.matches ? target : shown + (target - shown) * (1 - Math.exp(-dt * 6));
-      if (target >= 100 && shown > 99.4) shown = 100;
-      num.textContent = String(Math.round(shown)).padStart(3, "0");
-      fill.style.transform = `scaleX(${(shown / 100).toFixed(4)})`;
-      if (shown < 100) { requestAnimationFrame(step); return; }
-      if (done) return;
-      done = true;
-      loader.classList.add("is-done");
-      setTimeout(reveal, reduceMotion.matches ? 0 : 520);
-      setTimeout(() => loader.remove(), 1600);
+    const open = () => {
+      splash.classList.add("is-open");
+      setTimeout(reveal, reduceMotion.matches ? 0 : 750);
+      setTimeout(() => splash.remove(), 2800);
     };
-    requestAnimationFrame(step);
+    // wait for the fonts (at most 1.5s) so the headline never swaps typeface on screen
+    const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+    Promise.race([fonts, new Promise((r) => setTimeout(r, 1500))]).then(() => requestAnimationFrame(open));
   }
 
   /* Cards keep the artwork's own proportions (never cropped). */
@@ -147,7 +125,6 @@
   function workHTML() {
     return `
       <section class="work" id="work" data-tone="light" aria-labelledby="work-title">
-        <div class="trail-layer" aria-hidden="true"><canvas class="trail-canvas"></canvas></div>
         <div class="work-head">
           <h2 class="display work-title" id="work-title" data-reveal>Selected Works<span class="work-count">(${SERIES.length})</span></h2>
           <div class="view-toggle" role="group" aria-label="Layout" data-reveal style="--d:.1s">
