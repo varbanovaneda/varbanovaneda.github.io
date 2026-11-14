@@ -45,6 +45,7 @@
       kicker: "Designer & visual artist",
       intro: "Watercolour, printmaking, posters, illustration and brand design, from Sofia, Bulgaria.",
       hint: "Scroll to explore",
+      paintHint: "Move to paint",                    // shown when painting is possible; "" hides it
     },
 
     /* 2. INTRO STATEMENT — revealed word by word as you scroll */
@@ -75,6 +76,9 @@
 
     /* 7. CLOSING CALL TO ACTION */
     cta: { lines: ["Let’s work", "together"], button: "Start a project" },
+
+    /* The closing line at the very bottom of the page */
+    credit: "This portfolio was entirely conceptualized, designed, and developed by me, including the complete website creation.",
 
     ticker: "Neda Varbanova",
 

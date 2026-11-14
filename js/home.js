@@ -22,6 +22,7 @@
       <div class="stage" id="top">
         <canvas class="stage-canvas" aria-hidden="true"></canvas>
         <section class="hero" data-tone="light" aria-label="Introduction">
+          <canvas class="paint-canvas" aria-hidden="true"></canvas>
           <div class="hero-top">
             <p class="hero-kicker label" data-intro style="--d:.5s">${esc(H.kicker || S.role)} — ${esc(S.location)}</p>
             <div class="hero-status" data-intro style="--d:.6s">${status()}</div>
@@ -30,6 +31,7 @@
             `<span class="hl" aria-hidden="true"><span class="hl-in" style="--d:${(0.08 + i * 0.12).toFixed(2)}s">${esc(t)}</span></span>`).join("")}</h1>
           <div class="hero-foot">
             <p class="hero-intro" data-intro style="--d:.55s">${esc(H.intro)}</p>
+            ${H.paintHint ? `<span class="paint-hint label muted" aria-hidden="true" data-intro style="--d:.65s">${esc(H.paintHint)}</span>` : ""}
             <a class="scroll-hint label" href="#work" data-intro style="--d:.7s"><span class="scroll-line" aria-hidden="true"></span>${esc(H.hint || "Scroll to explore")}</a>
           </div>
         </section>
@@ -218,11 +220,7 @@
           </div>` : ""}
         </div>
         ${C.note ? `<p class="contact-note" data-reveal>${esc(C.note)}</p>` : ""}
-        <div class="contact-grid">
-          <div data-reveal><h3 class="label">Availability</h3><p>${status()}</p></div>
-          <div data-reveal style="--d:.06s"><h3 class="label">Based in</h3><p>${esc(S.location)} — <span data-clock>--:--</span></p></div>
-          <div data-reveal style="--d:.12s"><h3 class="label">Open to</h3><p>Commissions, illustration, posters, logos and collaborations</p></div>
-        </div>
+        ${S.credit ? `<p class="credit" data-reveal>${esc(S.credit)}</p>` : ""}
       </section>`;
   }
 

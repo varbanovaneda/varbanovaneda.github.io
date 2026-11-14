@@ -499,7 +499,8 @@
     const el = document.createElement("div");
     el.className = "cursor";
     el.setAttribute("aria-hidden", "true");
-    el.innerHTML = `<span class="cursor-ring"><span class="cursor-label"></span></span><span class="cursor-dot"></span>`;
+    // the label sits outside the ring so it is never scaled (and stays sharp)
+    el.innerHTML = `<span class="cursor-ring"></span><span class="cursor-label"></span><span class="cursor-dot"></span>`;
     document.body.append(el);
     const ring = $(".cursor-ring", el), dot = $(".cursor-dot", el), label = $(".cursor-label", el);
     const x = new Spring(innerWidth / 2, { response: 0.32 }), y = new Spring(innerHeight / 2, { response: 0.32 });
@@ -509,6 +510,7 @@
       x.step(dt); y.step(dt); s.step(dt);
       dot.style.transform = `translate3d(${px}px,${py}px,0)`;
       ring.style.transform = `translate3d(${x.value}px,${y.value}px,0) scale(${s.value.toFixed(3)})`;
+      label.style.transform = `translate3d(${x.value}px,${y.value}px,0) translate(-50%,-50%)`;
       if (x.settled && y.settled && s.settled) { running = false; return false; }
     };
     const kick = () => { if (!running) { running = true; schedule(tick); } };
@@ -525,7 +527,7 @@
       const text = t && t.dataset.cursor;
       label.textContent = text || "";
       el.classList.toggle("has-label", !!text);
-      s.target = text ? 3.4 : t ? 2.1 : 1;
+      s.target = text ? 2.6 : t ? 2.1 : 1;
       kick();
     });
     document.documentElement.addEventListener("pointerleave", () => { el.classList.remove("is-on"); shown = false; });
