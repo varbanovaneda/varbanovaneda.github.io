@@ -21,6 +21,7 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-cine: cubic-bezier(0.77, 0, 0.18, 1);
+  --radius: 10px;     /* corners of the artwork */
   color-scheme: light;
 }
 
@@ -310,7 +311,7 @@ html:not(.has-paint) .paint-hint { display: none; }
 
 .card { display: block; position: relative; }
 .card-media {
-  position: relative; overflow: hidden; aspect-ratio: var(--ar, 4 / 5);
+  position: relative; overflow: hidden; aspect-ratio: var(--ar, 4 / 5); border-radius: var(--radius);
   background: color-mix(in srgb, var(--black) 6%, var(--white));   /* solid, so the painted background never shows through an artwork */
   transition: transform 0.6s var(--ease-out);
 }
@@ -355,14 +356,10 @@ html:not(.has-cursor) .card-cta {
 }
 
 @media (hover: hover) {
-  .card:hover .card-media img { transform: scale(1.045); }
+  /* the work under the cursor grows a little; the others stay exactly as they are */
+  .card:hover .card-media { transform: scale(1.035); z-index: 3; box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--black) 45%, transparent); }
   .card:hover .card-arrow { opacity: 1; transform: none; }
-  .card-media, .card-meta { transition-property: transform, opacity, clip-path; }
-  .gallery:has(.card:hover) .card:not(:hover) .card-meta { opacity: 0.72; }
-  /* the other works quieten under a thin solid veil of paper (never see-through) */
-  .card-media::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: var(--white); opacity: 0; transition: opacity 0.6s var(--ease-out); }
-  .gallery:has(.card:hover) .card:not(:hover) .card-media::before { opacity: 0.3; }
-  .gallery .card :is(.card-media, .card-meta) { transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out), clip-path 1.4s var(--ease-out); }
+  .gallery .card :is(.card-media, .card-meta) { transition: opacity 0.6s var(--ease-out), transform 0.7s var(--ease-out), box-shadow 0.7s var(--ease-out), clip-path 1.4s var(--ease-out); }
 }
 
 /* Index (list) view */
@@ -386,7 +383,7 @@ html:not(.has-cursor) .card-cta {
   .index-row:hover .ir-title { transform: translateX(0.18em); }
 }
 
-.preview {
+.preview { border-radius: var(--radius);
   position: fixed; left: 0; top: 0; z-index: 40; pointer-events: none;
   width: clamp(220px, 20vw, 340px); aspect-ratio: 4 / 5; overflow: hidden;
   transform: scale(0); will-change: transform;
@@ -533,6 +530,7 @@ html:not(.has-cursor) .card-cta {
 /* Artwork shown whole: fits the viewport height, never cropped */
 .p-cover { margin: 0; padding: 0 var(--gutter); }
 .p-cover-frame {
+  border-radius: var(--radius); overflow: hidden;
   margin: 0 auto; aspect-ratio: var(--ratio, 4 / 3);
   width: min(100%, calc(88svh * var(--r, 1.333)));
   background: color-mix(in srgb, currentColor 5%, transparent);
@@ -558,7 +556,7 @@ html:not(.has-cursor) .card-cta {
 .shot[data-size="full"] { grid-column: 1 / -1; }
 .shot[data-size="half"] { grid-column: span 6; }
 .shot[data-size="wide"] { grid-column: 3 / span 8; margin-block: clamp(32px, 6vw, 112px); }
-.shot-media { position: relative; overflow: hidden; background: color-mix(in srgb, var(--black) 6%, var(--white)); }
+.shot-media { position: relative; overflow: hidden; border-radius: var(--radius); background: color-mix(in srgb, var(--black) 6%, var(--white)); }
 .shot-media img { width: 100%; height: 100%; object-fit: cover; }
 .shot-media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .shot figcaption { margin-top: 12px; opacity: 0.55; }
@@ -579,7 +577,7 @@ html:not(.has-cursor) .card-cta {
 .p-next { display: block; padding: clamp(40px, 5vw, 80px) var(--gutter) var(--section); border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
 .p-next-top { display: flex; justify-content: space-between; margin-bottom: clamp(24px, 3vw, 48px); }
 .p-next-title { font-size: clamp(3rem, 11vw, 12rem); transition: transform 0.8s var(--ease-out); }
-.p-next-media { position: relative; margin-top: clamp(28px, 3.5vw, 56px); aspect-ratio: 2.4 / 1; max-width: 1100px; overflow: hidden; background: color-mix(in srgb, var(--black) 6%, var(--white)); transition: transform 0.6s var(--ease-out); }
+.p-next-media { position: relative; border-radius: var(--radius); margin-top: clamp(28px, 3.5vw, 56px); aspect-ratio: 2.4 / 1; max-width: 1100px; overflow: hidden; background: color-mix(in srgb, var(--black) 6%, var(--white)); transition: transform 0.6s var(--ease-out); }
 .p-next-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out), opacity 0.9s var(--ease-out); }
 .p-next:active .p-next-media { transform: scale(0.99); transition-duration: 0.12s; }
 @media (hover: hover) {
@@ -665,7 +663,7 @@ img.is-error { visibility: hidden; }
   .curtain { display: none; }
   .line-in, .fade-up { transform: none; opacity: 1; }
   .js [data-reveal], .js [data-reveal] * { transform: none !important; clip-path: none !important; }
-  .card:hover .card-media img, .card-media img { transform: none !important; }
+  .card:hover .card-media, .card:hover .card-media img, .card-media img { transform: none !important; }
   .status-dot::after, .scroll-cue .arrow, .scroll-line::after, .grain { animation: none; }
   .js .hl-in, .js .hero [data-intro] { transform: none; opacity: 1; }
 }
@@ -753,9 +751,6 @@ img.is-error { visibility: hidden; }
 .js [data-medium="sketch"] .card[data-reveal] .card-frame img { transform: scale(1.03) translate(-1%, 1%); }
 .js [data-medium="sketch"] .card[data-reveal].is-in .card-media { --rv: 112%; }
 .js [data-medium="sketch"] .card[data-reveal].is-in .card-frame img { transform: none; }
-@media (hover: hover) {
-  .js [data-medium] .card[data-reveal].is-in:hover .card-frame img { transform: scale(1.045); }
-}
 
 /* ==========================================================================
    Watercolour-bloom page transitions (cross-document View Transitions)
@@ -804,7 +799,7 @@ img.is-error { visibility: hidden; }
 .p-siblings > .label { display: block; opacity: 0.55; margin-bottom: 20px; }
 .p-siblings-list { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
 .p-siblings-list a { display: block; transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out); }
-.p-sib-media { display: block; height: clamp(72px, 9vw, 120px); background: color-mix(in srgb, currentColor 6%, transparent); overflow: hidden; }
+.p-sib-media { display: block; border-radius: 6px; height: clamp(72px, 9vw, 120px); background: color-mix(in srgb, currentColor 6%, transparent); overflow: hidden; }
 .p-sib-media img { height: 100%; width: auto; }
 .p-siblings-list li[aria-current] a { outline: 1px solid currentColor; outline-offset: 4px; }
 .p-siblings-list li:not([aria-current]) a { opacity: 0.55; }

@@ -215,6 +215,7 @@
       panes.index.hidden = v !== "index";
       if (v === "index") initPreview();
       views.classList.remove("is-switching");
+      window.ScrollTrigger && window.ScrollTrigger.refresh();
     };
     if (!animate || reduceMotion.matches) return swap();
     views.classList.add("is-switching");
@@ -284,6 +285,31 @@
   });
 
   window.Site.init("home");
+
+  /* Scroll motion: each work rises into place while growing from a little smaller,
+     and works side by side drift at slightly different speeds, so the gallery
+     floats in layers like sheets of paper. Scrubbed by the scroll; nothing is
+     cropped. Off with reduced motion. */
+  const { gsap, ScrollTrigger } = window;
+  if (gsap && ScrollTrigger && !reduceMotion.matches) {
+    const small = matchMedia("(max-width: 640px)").matches;
+    $$(".series").forEach((series) => {
+      $$(".card-item", series).forEach((item, k) => {
+        const wide = +getComputedStyle(item).getPropertyValue("--span") >= 12;
+        const depth = small || wide ? 0.45 : k % 2 ? 1 : 0.55;              // neighbours drift at different speeds
+        gsap.fromTo(item, { y: 110 * depth }, {
+          y: -50 * depth, ease: "none",
+          scrollTrigger: { trigger: item, start: "top bottom", end: "bottom top", scrub: 0.6 },
+        });
+        gsap.fromTo(item, { scale: 0.9, transformOrigin: "50% 100%" }, {
+          scale: 1, ease: "power2.out",
+          scrollTrigger: { trigger: item, start: "top bottom", end: "top 55%", scrub: 0.6 },
+        });
+      });
+    });
+    document.fonts && document.fonts.ready.then(() => ScrollTrigger.refresh());
+    addEventListener("load", () => ScrollTrigger.refresh(), { once: true });
+  }
 
   /* Once the page has loaded, fetch the remaining artwork quietly in the background,
      so each image is already there when its card scrolls into view. */
