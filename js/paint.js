@@ -217,11 +217,13 @@
     /* ---------- Input: the brush -------------------------------------------- */
     let colorIndex = (Math.random() * PALETTE.length) | 0;
     let pointer = null, lastInput = -1e9;
+    let mouse = null;                                    // where the mouse rests on screen, so scrolling keeps painting
     const queue = [];
     function onMove(e) {
       const r = canvas.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width, y = 1 - (e.clientY - r.top) / r.height;
-      if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; return; }
+      if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; mouse = null; return; }
+      if (e.pointerType === "mouse") mouse = { x, y };
       const now = performance.now();
       if (!pointer || now - pointer.t > 250) {
         if (now - lastInput > 600) colorIndex = (colorIndex + 1) % PALETTE.length; // a pause starts a new colour
@@ -240,7 +242,7 @@
       colorIndex = (colorIndex + 1) % PALETTE.length;
       splat(pointer.x, pointer.y, 0, 0, PALETTE[colorIndex], 0.55, 1, 0.006); // a tap drops a bloom
     }, { passive: true });
-    document.documentElement.addEventListener("pointerleave", () => { pointer = null; });
+    document.documentElement.addEventListener("pointerleave", () => { pointer = null; mouse = null; });
 
     function drainQueue() {
       let budget = 48;                                                          // enough to catch up with a fast hand in one frame
@@ -250,8 +252,9 @@
         const dist = Math.hypot(dx, dy);
         const speed = dist / s.dt;
         const steps = Math.min(8, Math.max(1, Math.ceil(dist / 0.01)));
-        const fx = Math.max(-1.4, Math.min(1.4, (s.x1 - s.x0) / s.dt)) * 0.35;
-        const fy = Math.max(-1.4, Math.min(1.4, (s.y1 - s.y0) / s.dt)) * 0.35;
+        const push = s.still ? 0 : 0.35;                                          // a resting brush doesn't push the water
+        const fx = Math.max(-1.4, Math.min(1.4, (s.x1 - s.x0) / s.dt)) * push;
+        const fy = Math.max(-1.4, Math.min(1.4, (s.y1 - s.y0) / s.dt)) * push;
         const amount = (0.11 * Math.max(0.35, Math.min(1, 1.3 - speed * 0.35))) / Math.sqrt(steps);
         for (let k = 1; k <= steps; k++) {
           const t = k / steps;
@@ -297,6 +300,14 @@
       time += dt;
       const y = scrollY, shift = (y - lastY) / Math.max(1, canvas.clientHeight);
       lastY = y;
+      // scrolling under a resting mouse: the brush stays put and the paper slides beneath it,
+      // so paint the strip of paper that just passed under it (the step below moves it into place)
+      if (shift && mouse) {
+        const sway = (t) => Math.sin(t * 2.3) * 0.006 + Math.sin(t * 5.1) * 0.003;   // a hand is never perfectly still
+        queue.push({ x0: mouse.x + sway(time - dt), y0: mouse.y - shift, x1: mouse.x + sway(time), y1: mouse.y, dt: Math.max(dt, 1 / 60), still: true });
+        lastInput = now;
+        if (pointer) pointer.t = now;
+      }
       runIntro();
       drainQueue();
       idleBrush(now);
