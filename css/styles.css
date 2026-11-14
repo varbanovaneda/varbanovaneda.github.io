@@ -472,7 +472,7 @@ html:not(.has-cursor) .card-cta {
 }
 /* the closing photo, with the sentence written into the pale wall at its top left */
 .credit-card {
-  overflow: hidden; border-radius: var(--radius); aspect-ratio: 1214 / 802; width: min(100%, calc(84vh * 1214 / 802)); margin-inline: auto;   /* the whole photo, uncropped, fitting the screen */
+  overflow: hidden; border-radius: var(--radius); aspect-ratio: 1214 / 802; width: 100%;   /* the whole photo, uncropped, across the full width */
   background: #8fa0aa;
 }
 .credit-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; }
