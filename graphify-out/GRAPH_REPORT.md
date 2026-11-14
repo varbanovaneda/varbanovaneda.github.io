@@ -1,9 +1,9 @@
 # Graph Report - varbanovaneda.github.io  (2026-11-14)
 
 ## Corpus Check
-- 8 files · ~16,426 words
+- 8 files · ~16,464 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 2 file(s) not represented in the graph (top: (none) 1, .css 1)
+- Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .css 1)
 
 ## Summary
 - 84 nodes · 132 edges · 12 communities (8 shown, 4 thin omitted)
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `2b5d9e2d`
+- Built from commit: `e65e81a3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -33,11 +33,11 @@
 3. `Spring` - 7 edges
 4. `frame()` - 7 edges
 5. `initCursor()` - 6 edges
-6. `createWritingHand()` - 5 edges
-7. `allocate()` - 5 edges
-8. `splat()` - 5 edges
+6. `allocate()` - 5 edges
+7. `splat()` - 5 edges
+8. `createWritingHand()` - 5 edges
 9. `Portfolio template` - 5 edges
-10. `roll()` - 4 edges
+10. `pass()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Effects` --references--> `makeWash()`  [INFERRED]

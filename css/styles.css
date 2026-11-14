@@ -11,8 +11,8 @@
   --fg: var(--black);
   --status: #3fd47f;
 
-  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;   /* wide headlines; has Cyrillic */
-  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fira Sans Extra Condensed", "Arial Narrow", "Helvetica Neue", sans-serif; /* has Cyrillic */
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   --gutter: clamp(16px, 2.6vw, 44px);
   --section: clamp(104px, 14vw, 224px);
@@ -66,9 +66,10 @@ h1, h2, h3, p { margin: 0; }
 /* ---------- Type ---------------------------------------------------------- */
 .display {
   font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 0.98;
-  letter-spacing: -0.025em;
+  font-weight: 800;
+  font-stretch: 66%;
+  line-height: 0.86;
+  letter-spacing: -0.012em;
   text-transform: uppercase;
 }
 .label {
@@ -118,7 +119,7 @@ h1, h2, h3, p { margin: 0; }
 .nav.is-hidden:not(:focus-within) { transform: translateY(-120%); }
 .nav a { pointer-events: auto; }
 .nav-logo {
-  font-family: var(--font-display); font-weight: 700;
+  font-family: var(--font-display); font-weight: 800; font-stretch: 72%;
   font-size: clamp(1.125rem, 1.4vw, 1.375rem); letter-spacing: 0; text-transform: uppercase;
   display: inline-flex; align-items: center;
   transition: opacity 0.4s var(--ease-out);
@@ -162,7 +163,7 @@ h1, h2, h3, p { margin: 0; }
   padding: 120px var(--gutter) clamp(24px, 3vw, 44px);
 }
 .hero-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: auto; }
-.hero-title { font-size: clamp(2.5rem, 11.4vw, 13rem); line-height: 0.82; letter-spacing: -0.015em; margin-top: 40px; }
+.hero-title { font-size: clamp(4rem, 17vw, 21rem); line-height: 0.82; letter-spacing: -0.015em; margin-top: 40px; }
 .hl { display: block; overflow: hidden; padding-bottom: 0.03em; margin-bottom: -0.03em; }
 .hl-in { display: inline-block; }
 .js .hl-in { transform: translateY(108%); }
@@ -207,7 +208,7 @@ html:not(.has-paint) .paint-hint { display: none; }
 /* ---------- Film grain + vignette -----------------------------------------
    They sit just above the page background and text (z-index 1) but below the
    artwork (z-index 2), so the paintings themselves stay clean. */
-.card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media, .p-scroll-media { position: relative; z-index: 2; }
+.card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media, .p-scroll-media, .credit-card { position: relative; z-index: 2; }
 .grain {
   position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.55;
   background-size: 160px 160px; animation: grain 0.9s steps(6) infinite;
@@ -253,7 +254,7 @@ html:not(.has-paint) .paint-hint { display: none; }
   display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
   padding: 0 var(--gutter); margin-bottom: clamp(40px, 6vw, 96px);
 }
-.work-title { font-size: clamp(1.75rem, 5.4vw, 6.25rem); display: flex; align-items: flex-start; gap: 0.12em; }
+.work-title { font-size: clamp(3rem, 8vw, 9rem); display: flex; align-items: flex-start; gap: 0.12em; }
 .work-count { font: 500 clamp(0.875rem, 1.2vw, 1.125rem)/1 var(--font-body); letter-spacing: 0; opacity: 0.55; margin-top: 0.3em; }
 
 .view-toggle {
@@ -285,9 +286,9 @@ html:not(.has-paint) .paint-hint { display: none; }
   border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
 }
 .series-head { align-items: start; }
-.series-num { grid-column: 1 / span 2; font-size: clamp(1.75rem, 3.8vw, 4.25rem); opacity: 0.22; }
+.series-num { grid-column: 1 / span 2; font-size: clamp(2.25rem, 5.4vw, 5.75rem); opacity: 0.22; }
 .series-heading { grid-column: 3 / span 5; }
-.series-title { font-size: clamp(1.375rem, 2.7vw, 3rem); text-wrap: balance; }
+.series-title { font-size: clamp(2.25rem, 4.6vw, 5rem); text-wrap: balance; }
 .series-subtitle { margin-top: 14px; font-size: clamp(1rem, 1.25vw, 1.25rem); letter-spacing: -0.01em; opacity: 0.7; }
 .series-body { grid-column: 9 / -1; max-width: 46ch; }
 .series-meta { margin: 0 0 18px; display: grid; gap: 10px; }
@@ -338,11 +339,11 @@ html:not(.has-paint) .paint-hint { display: none; }
 }
 .card-num { opacity: 0.5; font-variant-numeric: tabular-nums; }
 .card-title {
-  font-family: var(--font-display); font-weight: 700;
-  font-size: clamp(0.95rem, 1.35vw, 1.45rem); line-height: 1.05; letter-spacing: -0.02em; text-transform: uppercase;
+  font-family: var(--font-display); font-weight: 800; font-stretch: 70%;
+  font-size: clamp(1.5rem, 2.3vw, 2.5rem); line-height: 0.95; letter-spacing: 0; text-transform: uppercase;
   display: inline-flex; align-items: flex-start; gap: 0.2em;
 }
-.card-item[data-wide] .card-title { font-size: clamp(1.1rem, 1.9vw, 2.1rem); }
+.card-item[data-wide] .card-title { font-size: clamp(1.625rem, 3vw, 3.25rem); }
 .card-arrow {
   font-family: var(--font-body); font-weight: 400; font-size: 0.5em; line-height: 1;
   opacity: 0; transform: translate(-6px, 6px); transition: opacity 0.4s var(--ease-out), transform 0.6s var(--ease-out);
@@ -371,8 +372,8 @@ html:not(.has-cursor) .card-cta {
 }
 .index-row:active { opacity: 0.6; }
 .ir-title {
-  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
-  font-size: clamp(1.15rem, 2.7vw, 2.9rem); line-height: 1;
+  font-family: var(--font-display); font-weight: 800; font-stretch: 66%; text-transform: uppercase;
+  font-size: clamp(1.75rem, 4.6vw, 5rem); line-height: 0.9;
   transition: transform 0.7s var(--ease-out);
 }
 .ir-num, .ir-cat, .ir-client, .ir-year { opacity: 0.55; }
@@ -396,7 +397,7 @@ html:not(.has-cursor) .card-cta {
 .ticker { overflow: hidden; padding: clamp(24px, 4vw, 64px) 0; white-space: nowrap; user-select: none; }
 .ticker-track {
   display: inline-block; will-change: transform; transform: translate3d(-25%, 0, 0);
-  font-family: var(--font-display); font-weight: 700; text-transform: uppercase;
+  font-family: var(--font-display); font-weight: 800; font-stretch: 66%; text-transform: uppercase;
   font-size: clamp(4.5rem, 16vw, 19rem); line-height: 0.82; letter-spacing: -0.01em;
 }
 .ticker-track span { padding-right: 0.25em; }
@@ -469,9 +470,29 @@ html:not(.has-cursor) .card-cta {
   margin-top: clamp(48px, 6vw, 96px); padding-top: clamp(40px, 5vw, 80px);
   border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
 }
-.credit p {
-  margin: 0 auto; max-width: 32ch; text-align: center; text-wrap: balance;
-  font: 500 clamp(1.375rem, 2.6vw, 2.5rem)/1.25 var(--font-body); letter-spacing: -0.025em;
+/* the closing photo, with the sentence written into the pale wall at its top left */
+.credit-card {
+  overflow: hidden; border-radius: var(--radius); aspect-ratio: 1214 / 802; max-height: 92vh; width: 100%;
+  background: #8fa0aa;
+}
+.credit-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% 40%; }
+/* a soft haze of light over the top-left corner, so the words sit clearly on the photo */
+.credit-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--white) 62%, transparent) 0%, color-mix(in srgb, var(--white) 22%, transparent) 38%, transparent 62%);
+}
+.credit-text {
+  position: absolute; top: 0; left: 0; z-index: 1; margin: 0;
+  padding: clamp(24px, 4.2vw, 72px); max-width: min(26ch, 62%);
+  font: 500 clamp(1.25rem, 2.5vw, 2.5rem)/1.22 var(--font-body); letter-spacing: -0.025em; text-wrap: pretty;
+  color: var(--black);
+}
+@media (max-width: 640px) {
+  .credit-card { aspect-ratio: 4 / 5; }
+  .credit-card img { object-position: 64% 50%; }
+  .credit-text { max-width: 92%; font-size: 1.15rem; }
+  /* on a narrow photo the words fall over her hair: a soft haze of light from the top keeps them clear */
+  .credit-card::after { background: linear-gradient(180deg, color-mix(in srgb, var(--white) 80%, transparent) 0%, color-mix(in srgb, var(--white) 55%, transparent) 30%, transparent 55%); }
 }
 .contact-grid {
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 40px var(--gutter);
@@ -517,7 +538,7 @@ html:not(.has-cursor) .card-cta {
 .p-topline { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(28px, 4vw, 64px); }
 .back-link { display: inline-flex; align-items: center; gap: 8px; }
 .back-link:active { opacity: 0.6; }
-.p-title { font-size: clamp(2rem, 7.2vw, 8.5rem); overflow-wrap: anywhere; }
+.p-title { font-size: clamp(3.5rem, 14vw, 16rem); overflow-wrap: anywhere; }
 .p-meta {
   display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px var(--gutter);
   margin: clamp(36px, 4.5vw, 72px) 0 0; padding-top: 16px;
@@ -592,7 +613,7 @@ html:not(.has-cursor) .card-cta {
 
 .p-next { display: block; padding: clamp(40px, 5vw, 80px) var(--gutter) var(--section); border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
 .p-next-top { display: flex; justify-content: space-between; margin-bottom: clamp(24px, 3vw, 48px); }
-.p-next-title { font-size: clamp(1.75rem, 5.8vw, 6.5rem); transition: transform 0.8s var(--ease-out); }
+.p-next-title { font-size: clamp(3rem, 11vw, 12rem); transition: transform 0.8s var(--ease-out); }
 .p-next-media { position: relative; border-radius: var(--radius); margin-top: clamp(28px, 3.5vw, 56px); aspect-ratio: 2.4 / 1; max-width: 1100px; overflow: hidden; background: color-mix(in srgb, var(--black) 6%, var(--white)); transition: transform 0.6s var(--ease-out); }
 .p-next-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-out), opacity 0.9s var(--ease-out); }
 .p-next:active .p-next-media { transform: scale(0.99); transition-duration: 0.12s; }
@@ -602,7 +623,7 @@ html:not(.has-cursor) .card-cta {
 }
 
 .not-found { min-height: 80svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 32px; padding: 140px var(--gutter) 64px; }
-.not-found h1 { font-size: clamp(2rem, 8vw, 8rem); }
+.not-found h1 { font-size: clamp(3.5rem, 14vw, 14rem); }
 
 /* Images fade in once decoded; failed images leave the neutral frame. */
 .js img[loading] { opacity: 0; }
@@ -643,7 +664,7 @@ img.is-error { visibility: hidden; }
   .nav-link { font-size: 0.75rem; }
   .hero { padding-top: 104px; }
   .hero-top { flex-direction: column; gap: 12px; }
-  .hero-title { font-size: 10.6vw; }
+  .hero-title { font-size: 19.5vw; }
   .hero-foot { flex-direction: column; align-items: flex-start; }
   .work-head { flex-direction: column; align-items: flex-start; }
   .series-grid { grid-template-columns: minmax(0, 1fr); }
@@ -651,7 +672,7 @@ img.is-error { visibility: hidden; }
   .card-item:only-child { grid-column: 1 / -1; }
   .series-head { grid-template-columns: minmax(0, 1fr); }
   .series-num, .series-heading, .series-body { grid-column: 1 / -1; }
-  .series-num { font-size: 1.75rem; margin-bottom: -6px; }
+  .series-num { font-size: 2.5rem; margin-bottom: -6px; }
   .card-meta { grid-template-columns: auto 1fr auto; }
   .card-info { grid-column: auto; text-align: right; }
   .index-row { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 12px; }

@@ -183,7 +183,13 @@
           </div>` : ""}
         </div>
         ${C.note ? `<p class="contact-note" data-reveal>${esc(C.note)}</p>` : ""}
-        ${S.credit ? `<div class="credit"><p data-reveal>${esc(S.credit)}</p></div>` : ""}
+        ${S.credit ? `
+        <div class="credit">
+          <div class="credit-card" data-reveal>
+            ${S.creditImage ? imgTag(S.creditImage, { sizes: "100vw" }) : ""}
+            <p class="credit-text">${esc(S.credit)}</p>
+          </div>
+        </div>` : ""}
       </section>`;
   }
 
