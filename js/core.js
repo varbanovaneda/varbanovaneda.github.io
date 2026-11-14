@@ -576,10 +576,12 @@
   }
 
   /* ---------- Watercolour-bloom page transitions ---------------------------
-     Uses cross-document View Transitions (Chrome/Edge 126+, Safari 18.2+):
-     the next page appears through a watercolour stain that spreads from the
-     click point, tinted with the project's colour, while the clicked artwork
-     flies from its card into place. Other browsers get the curtain below. */
+     Opening a work feels like entering the painting: the page you leave leans
+     in towards the click, washes in the artwork's own colours (sampled from the
+     image) bloom outward and dry away, and the work's page opens through a
+     watercolour stain while the artwork flies into place.
+     Cross-document View Transitions (Chrome/Edge 126+, Safari 18.2+); other
+     browsers get the same colour blooms just before the page changes. */
   const crossVT = "onpagereveal" in window;
 
   function seeded(seed) {
@@ -615,9 +617,58 @@
     g.filter = "blur(28px)";
     g.globalCompositeOperation = "destination-out";
     g.globalAlpha = 0.45; g.beginPath(); g.arc(size / 2 + (rand() - 0.5) * 60, size / 2 + (rand() - 0.5) * 60, size * 0.16, 0, Math.PI * 2); g.fill();
-    g.globalCompositeOperation = "source-atop"; g.filter = "none"; g.globalAlpha = 0.22; g.fillStyle = "#261E18";
+    g.globalCompositeOperation = "source-atop"; g.filter = "none"; g.globalAlpha = 0.18; g.fillStyle = "#413935";
     for (let k = 0; k < 2600; k++) g.fillRect(rand() * size, rand() * size, 1.2, 1.2);
     return c.toDataURL();
+  }
+
+  /* The artwork's own colours: its most present mid-tones, favouring saturated ones,
+     at most three, clearly different from each other. Paper white and deep shadow are skipped. */
+  function paletteOf(img) {
+    try {
+      if (!img || !img.complete || !img.naturalWidth) return null;
+      const n = 32, c = document.createElement("canvas");
+      c.width = c.height = n;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(img, 0, 0, n, n);
+      const d = g.getImageData(0, 0, n, n).data, buckets = new Map();
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], gr = d[i + 1], b = d[i + 2];
+        const max = Math.max(r, gr, b), min = Math.min(r, gr, b), light = (max + min) / 510, sat = (max - min) / 255;
+        if (light > 0.88 || light < 0.14 || (sat < 0.1 && light > 0.6)) continue;   // paper, pale greys, deep shadow
+        const key = (r >> 5) * 64 + (gr >> 5) * 8 + (b >> 5);
+        const e = buckets.get(key) || { r: 0, g: 0, b: 0, n: 0, sat: 0 };
+        e.r += r; e.g += gr; e.b += b; e.n++; e.sat += sat;
+        buckets.set(key, e);
+      }
+      // how present a colour is, weighted strongly by how saturated it is, so the pigment wins over the paper
+      const ranked = [...buckets.values()].map((e) => ({ r: e.r / e.n, g: e.g / e.n, b: e.b / e.n, score: e.n * ((e.sat / e.n) ** 1.6 + 0.02) }))
+        .sort((a, b) => b.score - a.score);
+      const out = [];
+      for (const p of ranked) {
+        if (out.every((q) => Math.hypot(p.r - q.r, p.g - q.g, p.b - q.b) > 60)) out.push(p);
+        if (out.length === 3) break;
+      }
+      return out.length ? out.map((p) => `rgb(${p.r | 0}, ${p.g | 0}, ${p.b | 0})`) : null;
+    } catch { return null; }    // e.g. an image that is not ready or not readable
+  }
+
+  /* Three overlapping washes in those colours, blooming from the click point. */
+  function washLayers(colors, seed, fallback = false) {
+    const list = colors && colors.length ? colors : ["#c9577a"];
+    return [0, 1, 2].map((k) => {
+      const w = document.createElement("div");
+      w.className = "vt-wash" + (fallback ? " is-fallback" : "");
+      w.setAttribute("aria-hidden", "true");
+      w.style.backgroundImage = `url(${stainCanvas(seed + k * 101, list[k % list.length])})`;
+      w.style.setProperty("--delay", `${(k * 0.11).toFixed(2)}s`);
+      // smaller than the screen, so their pigment edges stay visible; each slightly off the click point
+      w.style.setProperty("--reach", `${[420, 330, 250][k]}vmax`);
+      w.style.setProperty("--ox", `${[0, 7, -6][k]}vmin`);
+      w.style.setProperty("--oy", `${[0, -5, 6][k]}vmin`);
+      document.body.append(w);
+      return w;
+    });
   }
 
   function inView(el) {
@@ -651,10 +702,13 @@
       const project = (window.PROJECTS || []).find((x) => x.slug === slug);
       const series = project && (window.SERIES || []).find((s) => s.id === project.series);
       const pt = point || { x: innerWidth / 2, y: innerHeight / 2 };
+      // the colours of the artwork being entered (or left), else the series' accent
+      const art = (shared || (clicked && clicked.querySelector("[data-shared]")) || document.createElement("i")).querySelector("img");
+      const colors = paletteOf(art) || [(series && series.accent) || "#c9577a"];
       try {
         sessionStorage.setItem("vt", JSON.stringify({
           x: pt.x / innerWidth, y: pt.y / innerHeight, slug, shared: !!shared,
-          color: (series && series.accent) || "#c9577a", seed: (Math.random() * 1e9) | 0, at: Date.now(),
+          colors, seed: (Math.random() * 1e9) | 0, at: Date.now(),
         }));
       } catch {}
       clicked = null;
@@ -666,17 +720,12 @@
       if (reduceMotion.matches) { e.viewTransition.skipTransition(); return; }
       let vt = null;
       try { vt = JSON.parse(sessionStorage.getItem("vt")); } catch {}
-      if (!vt || Date.now() - vt.at > 6000) vt = { x: 0.5, y: 0.5, color: "#c9577a", seed: 7 };
+      if (!vt || Date.now() - vt.at > 6000) vt = { x: 0.5, y: 0.5, colors: ["#c9577a"], seed: 7 };
       const root = document.documentElement;
       root.style.setProperty("--sx", `${(vt.x * 100).toFixed(2)}vw`);
       root.style.setProperty("--sy", `${(vt.y * 100).toFixed(2)}vh`);
       root.style.setProperty("--stain", `url(${stainCanvas(vt.seed)})`);
-      const wash = document.createElement("div");
-      wash.className = "vt-wash";
-      wash.setAttribute("aria-hidden", "true");
-      wash.style.backgroundImage = `url(${stainCanvas(vt.seed, vt.color)})`;
-      wash.style.setProperty("--wash", vt.color);
-      document.body.append(wash);
+      const washes = washLayers(vt.colors || [vt.color], vt.seed);
 
       let shared = null;
       if (vt.shared && vt.slug) {
@@ -686,7 +735,7 @@
         if (shared) shared.style.viewTransitionName = "artwork";
       }
       e.viewTransition.finished.catch(() => {}).finally(() => {
-        wash.remove();
+        washes.forEach((w) => w.remove());
         if (shared) shared.style.viewTransitionName = "";
       });
     });
@@ -707,10 +756,23 @@
       if (url.pathname === location.pathname && url.search === location.search) return; // in-page anchor
       if (reduceMotion.matches) return;
       e.preventDefault();
-      document.documentElement.classList.add("is-leaving");
-      setTimeout(() => { location.href = url.href; }, 460);
+      const art = a.querySelector("[data-shared] img") || (url.searchParams.get("p") === null && $(".p-cover-frame img"));
+      if (art) {
+        const r = art.getBoundingClientRect(), root = document.documentElement;
+        root.style.setProperty("--sx", `${(((e.clientX || r.left + r.width / 2) / innerWidth) * 100).toFixed(2)}vw`);
+        root.style.setProperty("--sy", `${(((e.clientY || r.top + r.height / 2) / innerHeight) * 100).toFixed(2)}vh`);
+        washLayers(paletteOf(art), (Math.random() * 1e9) | 0, true);
+        setTimeout(() => { location.href = url.href; }, 650);
+      } else {
+        document.documentElement.classList.add("is-leaving");
+        setTimeout(() => { location.href = url.href; }, 460);
+      }
     });
-    addEventListener("pageshow", (e) => { if (e.persisted) document.documentElement.classList.remove("is-leaving"); });
+    addEventListener("pageshow", (e) => {
+      if (!e.persisted) return;
+      document.documentElement.classList.remove("is-leaving");
+      $$(".vt-wash").forEach((w) => w.remove());
+    });
   }
 
   function initClock() {
