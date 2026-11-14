@@ -90,7 +90,7 @@
     A *= 1.0 + edge * 1.5 + (grain - 0.5) * 0.4 + (fiber - 0.5) * 0.25;      // granulation
     float peak = max(max(A.r, A.g), A.b);                                     // layers never build up dark:
     A *= min(1.0, 0.2 / max(peak, 1e-4));                                     // cap the density, keep the hue
-    vec3 col = uPaper * exp(-A * 2.05);                                      // a little lighter than full strength
+    vec3 col = uPaper * exp(-A * 1.5);                                       // soft: about 60% of full strength
     col *= 0.988 + 0.024 * fiber;                                             // paper tooth
     outColor = vec4(col, 1.0);
   }`;
