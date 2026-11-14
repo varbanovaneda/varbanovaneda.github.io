@@ -4,12 +4,14 @@
    drawn as the light it lets through, and the canvas multiplies onto the 3D
    scene below (mix-blend-mode in styles.css), so strokes layer over the mist
    like real washes. Water spreads pigment while wet, then evaporates; edges
-   darken where pigment pools. Colours: SITE.theme.washes in content.js.
+   darken where pigment pools. The colour drifts through the palette as you
+   paint and jumps to the next one after a pause. Colours: SITE.theme.washes.
    ========================================================================== */
 (function () {
   const hero = document.querySelector(".hero");
   const canvas = hero && hero.querySelector(".paint-canvas");
   if (!canvas) return;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: "high-performance" });
   if (!gl) { hero.classList.add("no-paint"); return; }
   hero.classList.add("has-paint");
@@ -18,6 +20,9 @@
   const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
   const PALETTE = ((window.SITE && window.SITE.theme && window.SITE.theme.washes) || ["#AFC3D6", "#BCC9B4", "#EBCFCB", "#CEC8DE", "#8FA6B5"])
     .map((h) => hex(h).map((v) => Math.min(1, (1 - v) * 1.6)));
+  const N = PALETTE.length;
+  // a colour part-way between two neighbours in the palette (t = 2.5 → halfway from the 3rd to the 4th)
+  const colorAt = (t) => { const i = Math.floor(t), f = t - i, a = PALETTE[((i % N) + N) % N], b = PALETTE[(((i + 1) % N) + N) % N]; return a.map((v, k) => v + (b[k] - v) * f); };
 
   /* ---------- Shaders ------------------------------------------------------- */
   const VS = `#version 300 es
@@ -89,7 +94,7 @@
     float edge = clamp((length(ax) + length(ay)) * 3.2, 0.0, 1.0);           // pigment pools at edges
     float grain = hash(floor(gl_FragCoord.xy));
     float fiber = hash(floor(gl_FragCoord.xy * 0.33));
-    A *= 1.0 + edge * 1.5 + (grain - 0.5) * 0.4 + (fiber - 0.5) * 0.25;      // granulation, only where there is pigment
+    A *= 1.0 + edge * 1.5 + (grain - 0.5) * 0.4 + (fiber - 0.5) * 0.25;      // granulation
     float peak = max(max(A.r, A.g), A.b);                                     // layers never build up dark:
     A *= min(1.0, 0.2 / max(peak, 1e-4));                                     // cap the density, keep the hue
     outColor = vec4(exp(-A * 2.5), 1.0);                                      // white = untouched, multiplied over the scene
@@ -212,7 +217,7 @@
   }
 
   /* ---------- Input: the brush ---------------------------------------------- */
-  let colorIndex = (Math.random() * PALETTE.length) | 0;
+  let hue = Math.floor(Math.random() * N);          // position in the palette; grows as the brush travels
   let pointer = null, lastInput = -1e9;
   const queue = [];
   function onMove(e) {
@@ -221,7 +226,7 @@
     if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; return; }
     const now = performance.now();
     if (!pointer || now - pointer.t > 250) {
-      if (now - lastInput > 600) colorIndex = (colorIndex + 1) % PALETTE.length; // a pause starts a new colour
+      if (now - lastInput > 600) hue = Math.floor(hue) + 1;                      // a pause starts a new colour
       pointer = { x, y, t: now };
     } else {
       queue.push({ x0: pointer.x, y0: pointer.y, x1: x, y1: y, dt: Math.max((now - pointer.t) / 1000, 1 / 240) });
@@ -234,8 +239,8 @@
   hero.addEventListener("pointerdown", (e) => {
     onMove(e);
     if (!pointer) return;
-    colorIndex = (colorIndex + 1) % PALETTE.length;
-    splat(pointer.x, pointer.y, 0, 0, PALETTE[colorIndex], 0.55, 1, 0.006); // a tap drops a bloom
+    hue = Math.floor(hue) + 1;
+    splat(pointer.x, pointer.y, 0, 0, colorAt(hue), 0.55, 1, 0.006);        // a tap drops a bloom
   }, { passive: true });
   hero.addEventListener("pointerleave", () => { pointer = null; });
 
@@ -252,11 +257,37 @@
       const amount = (0.11 * Math.max(0.35, Math.min(1, 1.3 - speed * 0.35))) / Math.sqrt(steps);
       for (let k = 1; k <= steps; k++) {
         const t = k / steps;
-        splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, PALETTE[colorIndex], amount, 0.85, 0.0026);
+        hue += (dist / steps) * 1.4;                                               // about one colour per two-thirds of the screen
+        splat(s.x0 + (s.x1 - s.x0) * t, s.y0 + (s.y1 - s.y0) * t, fx / steps, fy / steps, colorAt(hue), amount, 0.85, 0.0026);
         budget--;
       }
     }
     if (queue.length > 48) queue.splice(0, queue.length - 48); // never lag far behind the hand
+  }
+
+  /* ---------- Opening blooms + idle brush ----------------------------------- */
+  const intro = [
+    { at: 0.15, x: 0.18, y: 0.7, c: 0, r: 0.016 },
+    { at: 0.45, x: 0.78, y: 0.78, c: 1, r: 0.012 },
+    { at: 0.8, x: 0.62, y: 0.42, c: 2, r: 0.014 },
+    { at: 1.15, x: 0.35, y: 0.3, c: 4, r: 0.01 },
+    { at: 1.5, x: 0.9, y: 0.35, c: 5, r: 0.011 },
+    { at: 1.9, x: 0.08, y: 0.25, c: 3, r: 0.009 },
+  ];
+  function runIntro() {
+    while (intro.length && intro[0].at <= time) {
+      const b = intro.shift();
+      const jitter = () => (Math.random() - 0.5) * 0.08;
+      splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % N], 0.42, 1, b.r);
+      splat(b.x + jitter(), b.y + jitter(), 0, 0, PALETTE[b.c % N], 0.22, 1, b.r * 0.45);
+    }
+  }
+  function idleBrush(now) {
+    if (reduce || now - lastInput < 3500 || intro.length) return;
+    const t = time * 0.35;
+    const x = 0.5 + 0.42 * Math.sin(t * 0.61), y = 0.5 + 0.34 * Math.sin(t * 0.83 + 1.3);
+    const vx = 0.42 * 0.61 * 0.35 * Math.cos(t * 0.61), vy = 0.34 * 0.83 * 0.35 * Math.cos(t * 0.83 + 1.3);
+    splat(x, y, vx * 0.5, vy * 0.5, colorAt(time / 6), 0.022, 0.6, 0.0035);   // the idle brush drifts through the colours too
   }
 
   /* ---------- Loop ---------------------------------------------------------- */
@@ -266,10 +297,12 @@
     const dt = Math.min((now - last) / 1000, 1 / 30);
     last = now;
     time += dt;
+    runIntro();
     drainQueue();
+    idleBrush(now);
     step(dt);
     render();
-    const keepGoing = now - lastInput < 6000;                                 // the wash settles, then the loop sleeps
+    const keepGoing = !reduce || intro.length || now - lastInput < 4000;
     if (keepGoing && visible && !document.hidden) raf = requestAnimationFrame(frame);
   }
   function wake() {
@@ -277,7 +310,15 @@
   }
 
   resize();
-  render();
+  if (reduce) {
+    // Still image: let the opening blooms settle off-screen, then draw once.
+    intro.forEach((b) => (b.at = 0));
+    runIntro();
+    for (let k = 0; k < 120; k++) step(1 / 30);
+    render();
+  } else {
+    wake();
+  }
 
   new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) wake(); }).observe(hero);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) wake(); });

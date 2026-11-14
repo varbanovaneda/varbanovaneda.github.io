@@ -1,8 +1,7 @@
 /* ==========================================================================
    SCENE — the hero's 3D world (Three.js), original to this site.
    Layers of watercolour washes and torn tissue paper float at different
-   depths in a pale mist, with fields of fine dots and soft spots of light
-   drifting between them. The camera leans with the mouse, so the layers
+   depths in a pale mist. The camera leans with the mouse, so the layers
    part like looking through paper; setProgress() moves it on scroll.
    Colours come from SITE.theme in content.js.
    ========================================================================== */
@@ -72,31 +71,6 @@ void main(){
   gl_FragColor = vec4(col, a);
 }`;
 
-/* Fine dots and soft spots of light. */
-const DOT_VS = `
-uniform float uT, uPR;
-attribute float aScale, aPhase, aAlpha; attribute vec3 aColor;
-varying vec3 vColor; varying float vA;
-void main(){
-  vec3 p = position;
-  p.y += sin(uT * 0.22 + aPhase) * 0.06;
-  p.x += cos(uT * 0.18 + aPhase * 1.3) * 0.05;
-  vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_Position = projectionMatrix * mv;
-  gl_PointSize = aScale * uPR * (10.0 / -mv.z);
-  vColor = aColor;
-  vA = aAlpha * (0.6 + 0.4 * sin(uT * 0.5 + aPhase * 3.0));
-}`;
-const DOT_FS = `
-uniform float uSoft;
-varying vec3 vColor; varying float vA;
-void main(){
-  float d = length(gl_PointCoord - 0.5);
-  float a = uSoft > 0.5 ? exp(-d * d * 14.0) : smoothstep(0.5, 0.28, d);
-  if (a < 0.01) discard;
-  gl_FragColor = vec4(vColor, a * vA);
-}`;
-
 /* Layer layout: z (depth), x, y, width, height, type (0 wash, 1 tissue), colour index, opacity. */
 const LAYERS = [
   { z: -9, x: -5.2, y: 1.6, w: 12, h: 8.5, t: 0, c: 4, o: 0.5 },
@@ -151,46 +125,6 @@ export function createScene(canvas, { theme, lite = false, still = false, observ
     return m;
   });
 
-  /* fine dots: a few loose dotted nets plus a scatter */
-  function dotField(scatter, soft, nets = []) {
-    let seed = soft ? 99 : 7;
-    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-    // curved grids of dots, like nets laid over a wash, with ragged oval outlines
-    const pts = [];
-    for (const n of nets) for (let gy = -7; gy <= 7; gy++) for (let gx = -11; gx <= 11; gx++) {
-      if (Math.hypot(gx / 11, gy / 7) > 0.8 + rnd() * 0.35) continue;
-      pts.push([n[0] + gx * 0.2 + gy * 0.03, n[1] + gy * 0.2 + Math.sin(gx * 0.4) * 0.12, n[2] + gx * gx * 0.004]);
-    }
-    for (let k = 0; k < scatter; k++) pts.push([(rnd() - 0.5) * 20, (rnd() - 0.5) * 11, -8 + rnd() * 10]);
-    const count = pts.length;
-    const pos = new Float32Array(count * 3), c = new Float32Array(count * 3);
-    const scale = new Float32Array(count), phase = new Float32Array(count), alpha = new Float32Array(count);
-    for (let k = 0; k < count; k++) {
-      pos.set(pts[k], k * 3);
-      const tint = soft ? new THREE.Color("#ffffff") : dots[Math.floor(rnd() * dots.length)];
-      c.set([tint.r, tint.g, tint.b], k * 3);
-      scale[k] = soft ? 40 + rnd() * 110 : 2.2 + rnd() * 2.6;
-      phase[k] = rnd() * 6.283;
-      alpha[k] = soft ? 0.35 + rnd() * 0.35 : 0.35 + rnd() * 0.5;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    g.setAttribute("aColor", new THREE.BufferAttribute(c, 3));
-    g.setAttribute("aScale", new THREE.BufferAttribute(scale, 1));
-    g.setAttribute("aPhase", new THREE.BufferAttribute(phase, 1));
-    g.setAttribute("aAlpha", new THREE.BufferAttribute(alpha, 1));
-    const p = new THREE.Points(g, new THREE.ShaderMaterial({
-      vertexShader: DOT_VS, fragmentShader: DOT_FS, transparent: true, depthWrite: false,
-      uniforms: { uT, uPR: { value: pr }, uSoft: { value: soft ? 1 : 0 } },
-    }));
-    p.renderOrder = soft ? 20 : 10;
-    scene.add(p);
-    return p;
-  }
-  const NETS = [[-3.4, 1.6, -4.4], [2.6, -1.4, -3], [4.8, 2.4, -6.5], [-1.2, -2.6, -1.2]];
-  const fine = dotField(lite ? 200 : 600, false, lite ? NETS.slice(0, 2) : NETS);
-  const glow = dotField(lite ? 8 : 16, true);
-
   /* camera: leans with the mouse, travels with scroll */
   const look = new THREE.Vector2(), lookTo = new THREE.Vector2();
   let progress = 0, progressTo = 0;
@@ -220,7 +154,6 @@ export function createScene(canvas, { theme, lite = false, still = false, observ
       m.position.y = base.y + Math.sin(uT.value * 0.12 + phase) * 0.18;
       m.position.x = base.x + Math.cos(uT.value * 0.09 + phase) * 0.12;
     });
-    fine.rotation.y = glow.rotation.y = Math.sin(uT.value * 0.03) * 0.05;
   }
 
   let raf = 0, last = 0, visible = true, slow = 0, frames = 0;
@@ -234,7 +167,7 @@ export function createScene(canvas, { theme, lite = false, still = false, observ
     // keep 60fps: if frames run long, render at a lower pixel ratio
     frames++; slow += dt > 0.021 ? 1 : 0;
     if (frames === 90) {
-      if (slow > 45 && pr > 1) { pr = Math.max(1, pr - 0.5); renderer.setPixelRatio(pr); fine.material.uniforms.uPR.value = glow.material.uniforms.uPR.value = pr; resize(); }
+      if (slow > 45 && pr > 1) { pr = Math.max(1, pr - 0.5); renderer.setPixelRatio(pr); resize(); }
       frames = slow = 0;
     }
     if (!still && visible && !document.hidden) raf = requestAnimationFrame(frame);

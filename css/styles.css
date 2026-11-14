@@ -411,8 +411,8 @@ html:not(.has-cursor) .card-cta {
 }
 
 /* ---------- About --------------------------------------------------------- */
-.about { padding: clamp(32px, 4vw, 64px) var(--gutter) clamp(72px, 9vw, 140px); }
-.about .section-head { margin-bottom: clamp(28px, 3.5vw, 56px); }
+.about { padding: clamp(32px, 4vw, 64px) var(--gutter) clamp(40px, 5vw, 80px); }
+.about .section-head, .contact .section-head { margin-bottom: clamp(28px, 3.5vw, 56px); }
 .about-intro {
   font: 500 clamp(1.375rem, 2.4vw, 2.375rem)/1.2 var(--font-body);
   letter-spacing: -0.025em; text-indent: 12%; max-width: 38ch;
@@ -436,7 +436,7 @@ html:not(.has-cursor) .card-cta {
 .about-portrait img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ---------- Contact ------------------------------------------------------- */
-.contact { padding: var(--section) var(--gutter) clamp(56px, 7vw, 112px); }
+.contact { padding: clamp(24px, 3vw, 48px) var(--gutter) clamp(48px, 6vw, 96px); }
 .contact-title { font-size: clamp(3.5rem, 13vw, 15rem); }
 .contact-row {
   display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;
@@ -467,9 +467,8 @@ html:not(.has-cursor) .card-cta {
 @media (hover: hover) { .copy-btn:hover { background: var(--fg); color: var(--bg); } }
 .contact-note { margin-top: 20px; max-width: 46ch; opacity: 0.6; }
 .credit {
-  margin-top: clamp(72px, 9vw, 160px); padding-top: 18px; max-width: 52ch;
-  border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent);
-  font-size: clamp(1rem, 1.3vw, 1.25rem); line-height: 1.5; letter-spacing: -0.01em; opacity: 0.75;
+  margin: clamp(56px, 7vw, 120px) auto 0; max-width: 32ch; text-align: center; text-wrap: balance;
+  font: 500 clamp(1.375rem, 2.6vw, 2.5rem)/1.25 var(--font-body); letter-spacing: -0.025em;
 }
 .contact-grid {
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 40px var(--gutter);
@@ -506,16 +505,6 @@ html:not(.has-cursor) .card-cta {
   display: grid; place-items: center;
   transition: background-color 0.4s var(--ease-out), border-color 0.4s var(--ease-out);
 }
-/* over an artwork: a small solid disc with crisp "View work" text */
-.cursor.has-label .cursor-ring { background: var(--black); border-color: var(--black); }
-.cursor-label {
-  position: fixed; left: 0; top: 0; will-change: transform;
-  font: 600 0.625rem/1 var(--font-body); letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap;
-  color: var(--white); opacity: 0; transition: opacity 0.25s;
-}
-.cursor.has-label .cursor-label { opacity: 1; transition-delay: 0.08s; }
-.cursor.has-label .cursor-dot { opacity: 0; }
-.cursor-dot { transition: opacity 0.2s; }
 .has-cursor, .has-cursor * { cursor: none !important; }
 
 /* ==========================================================================
