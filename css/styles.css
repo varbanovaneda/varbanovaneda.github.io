@@ -206,19 +206,19 @@ html:not(.has-paint) .paint-hint { display: none; }
 @media (prefers-reduced-motion: reduce) { .splash.is-open { animation: none; opacity: 0; transition: opacity 0.3s; } }
 
 /* ---------- Film grain + vignette -----------------------------------------
-   They sit just above the page background and text (z-index 1) but below the
-   artwork (z-index 2), so the paintings themselves stay clean. */
+   Part of the background paper only: they sit behind all content (z-index -1,
+   just above the watercolour canvas), so artwork, photos and text stay clean. */
 .card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media, .p-scroll-media, .credit-card { position: relative; z-index: 2; }
 .grain {
-  position: fixed; inset: -50%; z-index: 1; pointer-events: none; opacity: 0.55;
-  background-size: 160px 160px; animation: grain 0.9s steps(6) infinite;
+  position: fixed; inset: -50%; z-index: -1; pointer-events: none; opacity: 0.3;
+  background-size: 160px 160px; animation: grain 2.4s steps(4) infinite;
 }
 @keyframes grain {
   0% { transform: translate(0, 0); } 17% { transform: translate(-3%, 2%); } 33% { transform: translate(2%, -4%); }
   50% { transform: translate(-4%, -1%); } 67% { transform: translate(3%, 3%); } 83% { transform: translate(-1%, 4%); } 100% { transform: translate(0, 0); }
 }
 .vignette {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse 120% 100% at 50% 45%, transparent 55%, color-mix(in srgb, var(--black) 13%, transparent) 100%);
 }
 
