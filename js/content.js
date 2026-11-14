@@ -11,8 +11,9 @@
   const img = (file, width, height, alt) => {
     const src = `assets/work/${file}`;
     const base = file.replace(/\.[^.]+$/, "");
-    const set = VARIANTS.filter((w) => w <= width - 100).map((w) => `assets/work/opt/${base}-${w}.jpg ${w}w`);
-    return { src, width, height, alt, srcset: set.length ? [...set, `${src} ${width}w`].join(", ") : undefined };
+    // WebP copies (about a quarter smaller) are offered first; the JPG stays as the fallback src
+    const set = VARIANTS.filter((w) => w <= width - 100).map((w) => `assets/work/opt/${base}-${w}.webp ${w}w`);
+    return { src, width, height, alt, srcset: [...set, `assets/work/${base}.webp ${width}w`].join(", ") };
   };
 
   window.SITE = {
@@ -149,7 +150,7 @@
       ],
     },
     {
-      id: "robin-characters", title: "Robin — Character Illustrations", reveal: "sketch", accent: "#a9532f",
+      id: "robin-characters", title: "Robin — Character Illustrations", reveal: "sketch", accent: "#a9532f", phonePairs: true,
       meta: [["Client", "Robin"], ["Project", "Character Design / Illustration"]],
       text: [
         "A pair of illustrated characters developed as part of the visual identity of Robin, a coffee and bakery place that also hosts film projections. The two girls embody both sides of the venue: one carries a coffee cup, the other a film reel.",

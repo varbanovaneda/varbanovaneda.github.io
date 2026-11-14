@@ -52,12 +52,12 @@
     window.Site.lenis && window.Site.lenis.stop();
     const open = () => {
       splash.classList.add("is-open");
-      setTimeout(reveal, reduceMotion.matches ? 0 : 750);
+      setTimeout(reveal, reduceMotion.matches ? 0 : 500);
       setTimeout(() => splash.remove(), 2800);
     };
     // wait for the fonts (at most 1.5s) so the headline never swaps typeface on screen
     const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
-    Promise.race([fonts, new Promise((r) => setTimeout(r, 1500))]).then(() => requestAnimationFrame(open));
+    Promise.race([fonts, new Promise((r) => setTimeout(r, 700))]).then(() => requestAnimationFrame(open));
   }
 
   /* Cards keep the artwork's own proportions (never cropped). */
@@ -67,7 +67,8 @@
     // matches the real card width: 1 column ≤640px, 6-col grid ≤900px, 12-col grid above
     const alone = P.filter((x) => x.series === p.series).length === 1;
     const tablet = span >= 12 ? 100 : alone ? 67 : 50;
-    const sizes = `(max-width: 640px) 100vw, (max-width: 900px) ${tablet}vw, ${Math.min(100, span * 8)}vw`;
+    const phone = (seriesOf(p) || {}).phonePairs ? 50 : 100;                 // two per row on phones: half-width images
+    const sizes = `(max-width: 640px) ${phone}vw, (max-width: 900px) ${tablet}vw, ${Math.min(100, span * 8)}vw`;
     // deterministic, organic origin for the watercolour bloom
     const ox = 25 + ((i * 37) % 50), oy = 20 + ((i * 53) % 55);
     const start = p.start ? `--start:${+p.start};` : "";
@@ -91,7 +92,7 @@
       if (!works.length) return "";
       const [lede, ...rest] = s.text || [];
       return `
-        <section class="series" id="series-${esc(s.id)}" data-medium="${esc(s.reveal || "wash")}"${s.accent ? ` style="--accent:${esc(s.accent)}"` : ""} aria-labelledby="series-title-${n}">
+        <section class="series" id="series-${esc(s.id)}" data-medium="${esc(s.reveal || "wash")}"${s.phonePairs ? " data-pairs" : ""}${s.accent ? ` style="--accent:${esc(s.accent)}"` : ""} aria-labelledby="series-title-${n}">
           <header class="series-head" data-reveal>
             <span class="series-num display">${pad(n + 1)}</span>
             <div class="series-heading">
@@ -319,7 +320,9 @@
 
   /* Once the page has loaded, fetch the remaining artwork quietly in the background,
      so each image is already there when its card scrolls into view. */
-  const warm = () => $$(".card img[loading='lazy']").forEach((img) => (img.loading = "eager"));
+  const net = navigator.connection || {};
+  const frugal = net.saveData || /(^|-)2g|3g/.test(net.effectiveType || "") || matchMedia("(pointer: coarse)").matches;
+  const warm = () => $$(".card img[loading='lazy']").slice(0, frugal ? 4 : undefined).forEach((img) => (img.loading = "eager"));
   const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 1200));
   if (document.readyState === "complete") idle(warm);
   else addEventListener("load", () => idle(warm), { once: true });

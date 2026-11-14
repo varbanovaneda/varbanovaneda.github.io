@@ -95,6 +95,9 @@
     outColor = vec4(col, 1.0);
   }`;
 
+  const touch = matchMedia("(pointer: coarse)").matches;
+  const hero = document.querySelector(".hero");
+
   function createPaint(canvas) {
     const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: "high-performance" });
     if (!gl) return false;
@@ -167,7 +170,7 @@
 
     function resize() {
       const r = canvas.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio || 1, 1.25);
+      const dpr = Math.min(devicePixelRatio || 1, touch ? 1 : 1.25);           // phones: fewer pixels to fill, smoother scrolling
       const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       aspect = r.width / Math.max(1, r.height);
@@ -223,6 +226,8 @@
       const r = canvas.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width, y = 1 - (e.clientY - r.top) / r.height;
       if (x < 0 || x > 1 || y < 0 || y > 1) { pointer = null; mouse = null; return; }
+      // on a touch screen a finger paints only over the header; elsewhere it is just scrolling
+      if (e.pointerType !== "mouse" && hero && e.clientY > hero.getBoundingClientRect().bottom) { pointer = null; return; }
       if (e.pointerType === "mouse") mouse = { x, y };
       const now = performance.now();
       if (!pointer || now - pointer.t > 250) {
@@ -291,6 +296,15 @@
       splat(x, y, vx * 0.5, vy * 0.5, PALETTE[Math.floor(time / 6) % PALETTE.length], 0.022, 0.6, 0.0035);
     }
 
+    /* on phones, below the header: a light brush drifts across the paper by itself as the page scrolls,
+       just enough to show the effect without getting in the way */
+    let drift = Math.random() * 10;
+    function scrollBrush(shift) {
+      drift += Math.min(Math.abs(shift), 0.05) * 9;
+      const x = 0.5 + 0.38 * Math.sin(drift * 0.9), y = 0.55 + 0.3 * Math.sin(drift * 0.53 + 1.1);
+      splat(x, y, 0, 0, PALETTE[Math.floor(drift / 4) % PALETTE.length], 0.07, 0.7, 0.0055);
+    }
+
     /* ---------- Loop -------------------------------------------------------- */
     let raf = 0, last = 0, lastY = scrollY, lastScroll = -1e9;
     function frame(now) {
@@ -311,6 +325,7 @@
       runIntro();
       drainQueue();
       idleBrush(now);
+      if (touch && shift && !atTop()) scrollBrush(shift);
       step(dt, shift);
       render();
       // keep going while something moves: the idle brush, a fresh stroke drying, or the page scrolling

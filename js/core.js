@@ -536,7 +536,7 @@
     const { gsap, ScrollTrigger, Lenis } = window;
     if (gsap && ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
     if (!Lenis || reduceMotion.matches) return;
-    lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9 });
+    lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 0.9 });
     window.Site.lenis = lenis;
     if (gsap && ScrollTrigger) {
       lenis.on("scroll", ScrollTrigger.update);

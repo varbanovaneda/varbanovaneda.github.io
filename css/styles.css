@@ -58,7 +58,7 @@ img, video, iframe { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; }
 ul, ol { list-style: none; margin: 0; padding: 0; }
-h1, h2, h3, p { margin: 0; }
+h1, h2, h3, h4, p { margin: 0; }
 ::selection { background: var(--fg); color: var(--bg); }
 :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; border-radius: 2px; }
 [id] { scroll-margin-top: 24px; }
@@ -198,7 +198,7 @@ html:not(.has-paint) .paint-hint { display: none; }
   -webkit-mask-size: 100% 100%, 0 0; mask-size: 100% 100%, 0 0;
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
-.splash.is-open { animation: splash-open 2.2s cubic-bezier(0.62, 0.02, 0.28, 1) forwards; }
+.splash.is-open { animation: splash-open 1.7s cubic-bezier(0.62, 0.02, 0.28, 1) forwards; }
 @keyframes splash-open {
   70% { opacity: 1; }
   to { -webkit-mask-size: 100% 100%, 300vmax 300vmax; mask-size: 100% 100%, 300vmax 300vmax; opacity: 0; }
@@ -665,10 +665,16 @@ img.is-error { visibility: hidden; }
   :root { --row-gap: 56px; }
   .nav-links { gap: 18px; }
   .nav-link { font-size: 0.75rem; }
-  .hero { padding-top: 104px; }
-  .hero-top { flex-direction: column; gap: 12px; }
-  .hero-title { font-size: 19.5vw; }
-  .hero-foot { flex-direction: column; align-items: flex-start; }
+  .hero { padding-top: 96px; min-height: 72svh; justify-content: flex-start; }
+  .hero-title { order: -1; margin-top: 0; font-size: 19.5vw; }
+  .hero-top { flex-direction: column; gap: 10px; margin: 20px 0 0; }
+  .hero-foot { flex-direction: column; align-items: flex-start; margin-top: auto; }
+  /* series marked phonePairs in content.js show two works side by side */
+  .series[data-pairs] .series-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; }
+  .series[data-pairs] .card-item { grid-column: auto; }
+  .series[data-pairs] .card-meta { grid-template-columns: 1fr; gap: 4px; padding-top: 10px; }
+  .series[data-pairs] .card-num, .series[data-pairs] .card-info { display: none; }
+  .series[data-pairs] .card-title { font-size: 1.05rem; }
   .work-head { flex-direction: column; align-items: flex-start; }
   .series-grid { grid-template-columns: minmax(0, 1fr); }
   .card-item, .card-item[data-wide] { grid-column: 1 / -1; }

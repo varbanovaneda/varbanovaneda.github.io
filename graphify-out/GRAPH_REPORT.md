@@ -1,17 +1,17 @@
 # Graph Report - varbanovaneda.github.io  (2026-11-14)
 
 ## Corpus Check
-- 8 files · ~16,464 words
+- 8 files · ~16,665 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 3 file(s) not represented in the graph (top: (none) 2, .css 1)
+- Unclassified: 4 file(s) not represented in the graph (top: (none) 3, .css 1)
 
 ## Summary
-- 84 nodes · 132 edges · 12 communities (8 shown, 4 thin omitted)
+- 85 nodes · 135 edges · 12 communities (8 shown, 4 thin omitted)
 - Extraction: 86% EXTRACTED · 14% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e65e81a3`
+- Built from commit: `d6680502`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -28,16 +28,16 @@
 - initHandwriting
 
 ## God Nodes (most connected - your core abstractions)
-1. `createPaint()` - 17 edges
+1. `createPaint()` - 18 edges
 2. `init()` - 12 edges
-3. `Spring` - 7 edges
-4. `frame()` - 7 edges
+3. `frame()` - 8 edges
+4. `Spring` - 7 edges
 5. `initCursor()` - 6 edges
-6. `allocate()` - 5 edges
-7. `splat()` - 5 edges
-8. `createWritingHand()` - 5 edges
+6. `splat()` - 6 edges
+7. `createWritingHand()` - 5 edges
+8. `allocate()` - 5 edges
 9. `Portfolio template` - 5 edges
-10. `pass()` - 4 edges
+10. `roll()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Effects` --references--> `makeWash()`  [INFERRED]
@@ -50,7 +50,7 @@
 
 ### Community 0 - "createPaint"
 Cohesion: 0.22
-Nodes (17): createPaint(), allocate(), drainQueue(), frame(), idleBrush(), onMove(), pair(), pass() (+9 more)
+Nodes (18): createPaint(), allocate(), drainQueue(), frame(), idleBrush(), onMove(), pair(), pass() (+10 more)
 
 ### Community 1 - "core.js"
 Cohesion: 0.30
@@ -87,8 +87,8 @@ Nodes (4): initViewTransitions(), inView(), seeded(), stainCanvas()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `makeWash()` connect `core.js` to `Portfolio template`?**
-  _High betweenness centrality (0.060) - this node is a cross-community bridge._
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `initCursor()` (e.g. with `.snap()` and `.step()`) actually correct?**
   _`initCursor()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Why does `Effects` connect `Portfolio template` to `core.js`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+  _High betweenness centrality (0.050) - this node is a cross-community bridge._
