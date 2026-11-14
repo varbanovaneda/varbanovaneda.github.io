@@ -210,7 +210,7 @@ html:not(.has-paint) .paint-hint { display: none; }
    just above the watercolour canvas), so artwork, photos and text stay clean. */
 .card-media, .p-cover-frame, .shot-media, .p-next-media, .p-sib-media, .p-scroll-media, .credit-card { position: relative; z-index: 2; }
 .grain {
-  position: fixed; inset: -50%; z-index: -1; pointer-events: none; opacity: 0.3;
+  position: fixed; inset: -50%; z-index: -1; pointer-events: none; opacity: 0.42;
   background-size: 160px 160px; animation: grain 2.4s steps(4) infinite;
 }
 @keyframes grain {
@@ -483,14 +483,15 @@ html:not(.has-cursor) .card-cta {
 }
 .credit-text {
   position: absolute; top: 0; left: 0; z-index: 1; margin: 0;
-  padding: clamp(24px, 4.2vw, 72px); max-width: min(26ch, 62%);
-  font: 500 clamp(1.25rem, 2.5vw, 2.5rem)/1.22 var(--font-body); letter-spacing: -0.025em; text-wrap: pretty;
+  padding: clamp(24px, 4.2vw, 72px); max-width: min(34ch, 46%);
+  /* written by hand, like a quick ballpoint note on the photo */
+  font: 400 clamp(1.5rem, 2.9vw, 2.9rem)/1.4 "Nothing You Could Do", "Bradley Hand", "Segoe Print", cursive; letter-spacing: 0; text-wrap: pretty;
   color: var(--black);
 }
 @media (max-width: 640px) {
   .credit-card { aspect-ratio: 4 / 5; }
   .credit-card img { object-position: 64% 50%; }
-  .credit-text { max-width: 92%; font-size: 1.15rem; }
+  .credit-text { max-width: 92%; font-size: 1.35rem; }
   /* on a narrow photo the words fall over her hair: a soft haze of light from the top keeps them clear */
   .credit-card::after { background: linear-gradient(180deg, color-mix(in srgb, var(--white) 80%, transparent) 0%, color-mix(in srgb, var(--white) 55%, transparent) 30%, transparent 55%); }
 }

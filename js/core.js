@@ -569,7 +569,7 @@
     for (let i = 0; i < n * n; i++) {
       const v = Math.random();
       const dark = v < 0.5;
-      img.data.set(dark ? [65, 57, 53, (0.5 - v) * 60] : [255, 255, 255, (v - 0.5) * 70], i * 4);
+      img.data.set(dark ? [65, 57, 53, (0.5 - v) * 75] : [255, 255, 255, (v - 0.5) * 90], i * 4);
     }
     g.putImageData(img, 0, 0);
     return c.toDataURL();
