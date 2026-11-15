@@ -77,7 +77,7 @@
     cta: { lines: ["Let’s work", "together"], button: "Start a project" },
 
     /* The closing line at the very bottom of the page, set over a photo */
-    credit: "This portfolio website was designed and built by me as part of my work :)",
+    credit: "This portfolio website was designed and built by me as part of my creative work :)",
     creditImage: img("neda-portrait.jpg", 1214, 802, "Neda Varbanova smiling and looking down, on film, in soft blue and pink light"),
 
     ticker: "Neda Varbanova",
