@@ -272,6 +272,14 @@
     { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee") },
 
     /* 07 Robin — Easter Kozunak Packaging */
-    { slug: "robin-kozunak", series: "robin-kozunak", span: 12, title: "Kozunak Packaging", category: "Packaging illustration", cover: img("robin-lab.jpg", 1600, 428, "Two bakers carrying kozunak bread with a robin, and a scribbled robin with the line better when shared") },
+    {
+      slug: "robin-kozunak", series: "robin-kozunak", span: 12, title: "Kozunak Packaging", category: "Packaging illustration",
+      cover: img("robin-lab.jpg", 1600, 428, "Two bakers carrying kozunak bread with a robin, and a scribbled robin with the line better when shared"),
+      // on the work's own page: the packaging in use
+      gallery: [
+        { image: img("kozunak-bucket.jpg", 1190, 1394, "A metal kozunak bucket wrapped in the Robin Lab label, with the two bakers carrying bread"), size: "half", caption: "The kozunak bucket" },
+        { image: img("kozunak-buckets.jpg", 1238, 1490, "Stacked kozunak buckets in a bakery kitchen, alternating the bakers illustration and the Better when shared side"), size: "half", caption: "Both sides of the label, in the kitchen" },
+      ],
+    },
   ];
 })();
