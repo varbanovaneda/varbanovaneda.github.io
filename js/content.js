@@ -271,8 +271,8 @@
     /* 06 Leak — Character Illustrations */
     { slug: "robin-characters-front", series: "robin-characters", span: 6, title: "The Baristas — Front", category: "Character design", cover: img("winter-walk-1.jpg", 1445, 1117, "Line illustration of two girls walking, one carrying a cup, one a film reel, front view") },
     { slug: "robin-characters-side", series: "robin-characters", span: 6, title: "The Baristas — Side", category: "Character design", cover: img("winter-walk-2.jpg", 1480, 1141, "Line illustration of the same two girls walking, side view") },
-    { slug: "moka-break", series: "robin-characters", span: 6, title: "Moka Break", category: "Character design", cover: img("moka-break.jpg", 1600, 1200, "Line illustration of a man with a moka pot coffee maker") },
-    { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee") },
+    { slug: "moka-break", series: "robin-characters", span: 6, title: "Moka Break", category: "Character design", cover: img("moka-break.jpg", 1600, 1200, "Line illustration of a man with a moka pot coffee maker"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
+    { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
 
     /* 07 Robin — Easter Kozunak Packaging */
     {
