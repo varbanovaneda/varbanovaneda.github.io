@@ -240,14 +240,9 @@
       slug: "wild-goats-logo", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "Logo",
       description: [
         "A logo for the event itself, which was later adapted into a medal design awarded to participants after certain trips.",
-        "For the logo, I combined the silhouette of a goat with a mountain-inspired form, reflecting the company’s connection to the mountains and its adventurous character. I created it in both black and white versions, so it works on different backgrounds and across branding applications while keeping a strong, recognisable identity.",
+        "For the logo, I combined the silhouette of a goat with a mountain-inspired form, reflecting the company’s connection to the mountains and its adventurous character.",
       ],
       cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape"),
-      // on the work's own page: the two versions side by side
-      gallery: [
-        { image: img("wild-goats.jpg", 846, 891, "The logo in black on white"), size: "half", caption: "Black on white" },
-        { image: img("wild-goats-white.jpg", 846, 891, "The logo in white on black"), size: "half", caption: "White on black" },
-      ],
     },
 
     {
