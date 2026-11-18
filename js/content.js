@@ -174,30 +174,30 @@
      description (optional) is the work's own text; otherwise its page shows the series text. */
   window.PROJECTS = [
     /* 01 Watercolour Studies */
-    { slug: "roses-and-cherries", series: "watercolour", span: 8, title: "Roses & Cherries", category: "Watercolour", cover: img("roses-and-cherries.jpg", 1600, 1161, "Watercolour of pink roses above a bowl of red cherries") },
-    { slug: "preserved", series: "watercolour", span: 4, title: "Preserved", category: "Watercolour", cover: img("preserved.jpg", 1185, 1600, "Watercolour of fruit inside a glass jar with a red lid") },
-    { slug: "rock-by-the-sea", series: "watercolour", span: 4, title: "Rock by the Sea", category: "Watercolour", cover: img("rock-by-the-sea.jpg", 1600, 1130, "Watercolour of a large rock by the sea under pink clouds") },
-    { slug: "persimmons", series: "watercolour", span: 4, title: "Persimmons", category: "Watercolour", cover: img("persimmons.jpg", 1600, 1165, "Watercolour of three persimmons with blue ornaments") },
-    { slug: "figs-and-blueberries", series: "watercolour", span: 4, title: "Figs & Blueberries", category: "Watercolour", cover: img("figs-and-blueberries.jpg", 1600, 1159, "Watercolour of a halved fig on a blue patterned plate with blueberries") },
-    { slug: "harvest", series: "watercolour", span: 4, title: "Harvest", category: "Watercolour", cover: img("harvest.jpg", 1148, 1600, "Watercolour still life of pumpkins, corn and a blue bowl") },
+    { slug: "roses-and-cherries", series: "watercolour", span: 8, title: "Roses & Cherries", category: "Watercolour", cover: img("roses-and-cherries.jpg", 1568, 1137, "Watercolour of pink roses above a bowl of red cherries") },
+    { slug: "preserved", series: "watercolour", span: 4, title: "Preserved", category: "Watercolour", cover: img("preserved.jpg", 1143, 1533, "Watercolour of fruit inside a glass jar with a red lid") },
+    { slug: "rock-by-the-sea", series: "watercolour", span: 4, title: "Rock by the Sea", category: "Watercolour", cover: img("rock-by-the-sea.jpg", 1560, 1079, "Watercolour of a large rock by the sea under pink clouds") },
+    { slug: "persimmons", series: "watercolour", span: 4, title: "Persimmons", category: "Watercolour", cover: img("persimmons.jpg", 1568, 1141, "Watercolour of three persimmons with blue ornaments") },
+    { slug: "figs-and-blueberries", series: "watercolour", span: 4, title: "Figs & Blueberries", category: "Watercolour", cover: img("figs-and-blueberries.jpg", 1568, 1135, "Watercolour of a halved fig on a blue patterned plate with blueberries") },
+    { slug: "harvest", series: "watercolour", span: 4, title: "Harvest", category: "Watercolour", cover: img("harvest.jpg", 1074, 1552, "Watercolour still life of pumpkins, corn and a blue bowl") },
     {
       slug: "plovdiv-musicians", series: "watercolour", span: 8, year: 2025, title: "Plovdiv Musicians", category: "Ink & wash",
       description: [
         "Unlike the rest of the series, this piece was made with a fine black liner marker. I then spread its ink with water, softening the lines into grey washes for a watercolour effect.",
       ],
-      cover: img("plovdiv-musicians.jpg", 1600, 1104, "Ink and wash sketch of two guitarists in hats, Plovdiv 2025"),
+      cover: img("plovdiv-musicians.jpg", 1488, 1071, "Ink and wash sketch of two guitarists in hats, Plovdiv 2025"),
     },
 
     /* 02 I Want — Linocut Prints */
     {
       slug: "bezpredelnost", series: "i-want", span: 7, year: 2026, lang: "bg", title: "Безпределност", category: "Linocut",
       summary: "The boat, lost at sea.",
-      cover: img("bezpredelnost.jpg", 1600, 1214, "Two-colour linocut print titled Bezpredelnost"),
+      cover: img("bezpredelnost.jpg", 1556, 1190, "Two-colour linocut print titled Bezpredelnost"),
     },
     {
       slug: "priboy", series: "i-want", span: 5, lang: "bg", title: "Прибой", category: "Linocut",
       summary: "The fender, drifting alongside it.",
-      cover: img("priboy.jpg", 1206, 1600, "Two-colour linocut of a rope knot and netted fender over water"),
+      cover: img("priboy.jpg", 1141, 1552, "Two-colour linocut of a rope knot and netted fender over water"),
     },
 
     /* 03 Poster Design */
