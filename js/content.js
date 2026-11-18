@@ -159,7 +159,7 @@
       meta: [["Client", "Robin"], ["Project", "Packaging Illustration / Poster Design"]],
       text: [
         "An illustrated visual identity developed for Robin's seasonal Easter packaging, featuring the robin bird alongside an elongated illustrative composition.",
-        "The artwork was created for a special bucket packaging design for kozunak, a traditional Bulgarian sweet Easter bread. The illustration was also adapted for promotional posters, allowing the visual language to extend beyond the packaging itself.",
+        "The artwork was created for a special bucket packaging design for kozunak, a traditional Bulgarian sweet Easter bread.",
         "The project combines illustration and seasonal storytelling to create a distinctive visual presentation for a traditional product, connecting cultural heritage with contemporary brand design.",
       ],
     },
