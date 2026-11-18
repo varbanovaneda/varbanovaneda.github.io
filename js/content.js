@@ -118,10 +118,12 @@
       id: "i-want", title: "I Want — Linocut Prints", reveal: "print", accent: "#4f6f99",
       meta: [["Medium", "Linocut / Printmaking"], ["Exhibition", "UNIART, New Bulgarian University"]],
       text: [
-        "A two-part linocut series created for the UNIART exhibition at New Bulgarian University, under the theme I Want.",
+        "A two-part linocut series created for and shown in the UNIART exhibition at New Bulgarian University, under the theme I Want.",
         "The works explore desire, longing and the search for a sense of belonging. Through the imagery of a boat lost at sea and a fender drifting alongside it, I wanted to express a particular emotional state — one of uncertainty, displacement and introspection.",
         "Both objects exist within the same vast, unfamiliar sea, appearing lost while simultaneously navigating their own way towards self-discovery. The two prints reflect a personal longing for a state of being that is difficult to define, somewhere between feeling lost and finding oneself.",
       ],
+      // a link shown with the series text (home page and each work's page)
+      link: { label: "See the exhibition on UNIART", url: "https://www.uniart.bg/%D0%9E%D0%B1%D1%80%D0%B0%D0%B7%D0%B8+%D0%B8+%D0%BE%D1%82%D0%BF%D0%B5%D1%87%D0%B0%D1%82%D1%8A%D1%86%D0%B8%2B%2B%2B%2B%D0%A1%D1%8A%D0%B1%D0%B8%D1%82%D0%B8%D1%8F/1/MNevctKHY5KHcZOHYNWvcBe3Y1KLcBe-YVafMBebMZeXctKbcBafMJefYFefI5KHcNKT" },
     },
     {
       id: "posters", title: "Poster Design", subtitle: "Frightening, Obscene Gesture & Power", reveal: "spray", accent: "#e0452e",

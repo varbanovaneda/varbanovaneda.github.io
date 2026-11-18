@@ -47,18 +47,20 @@
   /* The work's own text first; the series text follows (or stands alone). */
   const own = p.description || [];
   const seriesText = (series && series.text) || [];
+  const seriesLink = series && series.link
+    ? `<a class="p-link label" href="${esc(series.link.url)}" target="_blank" rel="noopener noreferrer">${roll(series.link.label)}<span aria-hidden="true">↗</span></a>` : "";
   const overview = `
     <section class="p-overview" aria-labelledby="overview-title">
       <h2 class="label" id="overview-title">${own.length ? "About this work" : "About the project"}</h2>
       <div class="p-overview-body">
         ${p.summary ? `<p class="p-summary" data-reveal>${esc(p.summary)}</p>` : ""}
-        <div class="p-desc" data-reveal style="--d:.1s">${(own.length ? own : seriesText).map((d) => `<p>${esc(d)}</p>`).join("")}</div>
+        <div class="p-desc" data-reveal style="--d:.1s">${(own.length ? own : seriesText).map((d) => `<p>${esc(d)}</p>`).join("")}</div>${own.length ? "" : seriesLink}
       </div>
     </section>
     ${own.length && seriesText.length ? `
     <section class="p-overview p-series" aria-labelledby="series-title">
       <h2 class="label" id="series-title">The project</h2>
-      <div class="p-overview-body"><div class="p-desc" data-reveal>${seriesText.map((d) => `<p>${esc(d)}</p>`).join("")}</div></div>
+      <div class="p-overview-body"><div class="p-desc" data-reveal>${seriesText.map((d) => `<p>${esc(d)}</p>`).join("")}</div>${seriesLink}</div>
     </section>` : ""}`;
 
   const gallery = (p.gallery || []).map((g, n) => `

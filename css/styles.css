@@ -587,6 +587,7 @@ html:not(.has-cursor) .card-cta {
 .p-desc { margin-top: clamp(32px, 4vw, 56px); columns: 2; column-gap: var(--gutter); max-width: 980px; }
 .p-desc p { opacity: 0.72; font-size: 1.0625rem; line-height: 1.6; break-inside: avoid; margin-bottom: 1em; }
 .p-link { display: inline-flex; gap: 8px; margin-top: 24px; }
+.series-link { display: inline-flex; gap: 8px; margin-top: 14px; }
 
 .p-gallery {
   display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));

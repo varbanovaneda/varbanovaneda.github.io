@@ -102,6 +102,7 @@
             <div class="series-body">
               ${s.meta?.length ? `<dl class="series-meta">${s.meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
               ${lede ? `<p class="series-lede">${esc(lede)}</p>` : ""}
+              ${s.link ? `<a class="series-link label" href="${esc(s.link.url)}" target="_blank" rel="noopener noreferrer">${roll(s.link.label)}<span aria-hidden="true">↗</span></a>` : ""}
               ${rest.length ? `<details class="series-more"><summary class="label"><span class="more-open">Read more</span><span class="more-close">Read less</span></summary>${rest.map((t) => `<p>${esc(t)}</p>`).join("")}</details>` : ""}
             </div>
           </header>
