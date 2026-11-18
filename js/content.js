@@ -135,10 +135,6 @@
       meta: [["Client", "Puldin — Дивите козлета (The Wild Goats)"], ["Project", "Brand Identity / Logo Design / T-shirt Illustration"]],
       text: [
         "Three projects for Puldin — Дивите козлета (The Wild Goats), a tourism company inspired by the spirit of adventure, nature and mountain exploration: the company’s logo, a commemorative T-shirt for its marathon event, and a T-shirt for its trip to the Pyrenees.",
-        "For the logo, I combined the silhouette of a goat with a mountain-inspired concept, representing the company’s connection to the mountains and its adventurous character. It was created in both black and white versions, allowing it to adapt to different backgrounds and branding applications while maintaining a strong and recognisable visual identity.",
-        "The T-shirt was created to celebrate the tenth season of the marathon. Developed for both children and adults, it reflects the inclusive nature of the event and its invitation for participants of all ages to take part. The illustration translates the energy and spirit of the marathon into a playful, wearable graphic.",
-        "The final artwork was produced and featured on the official event T-shirts, creating a shared visual identity for participants across different age groups.",
-        "For the group’s trip to the Pyrenees, I drew a second T-shirt: the animals of the mountains stacked into a playful totem, with the hand-lettered words “Les Pyrénées” winding between them.",
       ],
     },
     {
@@ -234,16 +230,32 @@
     {
       slug: "puldin-10th-season", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "T-shirt design",
       summary: "Ten seasons in love with the mountains.",
+      description: [
+        "This T-shirt was created to celebrate the brand’s tenth season. Designed for both children and adults, it reflects the organisation’s inclusive spirit and its invitation to people of all ages to explore nature and challenge themselves.",
+        "The illustration captures the energy of the participants, children and adults alike, who become like wild goats as they climb and connect with nature. I turned that spirit into a playful, wearable graphic.",
+      ],
       cover: img("divite-kozleta.jpg", 1336, 1280, "Three cartoon goats with backpacks in front of pine trees, with the text Divite kozleta, 10 seasons in love with the mountains"),
     },
-    { slug: "wild-goats-logo", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "Logo", cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape") },
+    {
+      slug: "wild-goats-logo", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "Logo",
+      description: [
+        "A logo for the event itself, which was later adapted into a medal design awarded to participants after certain trips.",
+        "For the logo, I combined the silhouette of a goat with a mountain-inspired form, reflecting the company’s connection to the mountains and its adventurous character. I created it in both black and white versions, so it works on different backgrounds and across branding applications while keeping a strong, recognisable identity.",
+      ],
+      cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape"),
+      // on the work's own page: the two versions side by side
+      gallery: [
+        { image: img("wild-goats.jpg", 846, 891, "The logo in black on white"), size: "half", caption: "Black on white" },
+        { image: img("wild-goats-white.jpg", 846, 891, "The logo in white on black"), size: "half", caption: "White on black" },
+      ],
+    },
 
     {
       slug: "puldin-pyrenees", series: "puldin", span: 4, title: "Les Pyrénées", category: "T-shirt design",
       summary: "A T-shirt for the Wild Goats’ trip to the Pyrenees.",
       description: [
-        "A T-shirt design for Puldin — Дивите козлета’s trip to the Pyrenees. The animals of the mountains are stacked into a playful totem: a sheep, a goat with its bell, a marmot and a fluffy white mountain dog, with the hand-lettered words “Les Pyrénées” winding between them.",
-        "A second version sets the same characters against hand-drawn peaks, bringing the mountains themselves into the design.",
+        "The final artwork was printed on the official event T-shirts, giving participants of every age a shared visual identity.",
+        "For the group’s trip to the Pyrenees, I designed a second T-shirt. It shows animals typical of the mountains stacked into a playful totem. The hand-lettered words “Les Pyrénées” wind between them and tie them all together, so the animals seem to form the mountain themselves.",
       ],
       cover: img("pyrenees.jpg", 1200, 1600, "A sheep, a goat with a bell, a marmot and a white mountain dog stacked around the green lettering Les Pyrénées"),
       // shown only on this work's own page, as a sideways-scrolling strip

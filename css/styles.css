@@ -593,6 +593,7 @@ html:not(.has-cursor) .card-cta {
   gap: clamp(16px, 2.6vw, 44px) var(--gutter); padding: 0 var(--gutter);
 }
 .shot { margin: 0; }
+.p-gallery + .p-siblings, .p-gallery + .p-next { margin-top: clamp(48px, 6vw, 96px); }
 .shot[data-size="full"] { grid-column: 1 / -1; }
 .shot[data-size="half"] { grid-column: span 6; }
 .shot[data-size="wide"] { grid-column: 3 / span 8; margin-block: clamp(32px, 6vw, 112px); }
