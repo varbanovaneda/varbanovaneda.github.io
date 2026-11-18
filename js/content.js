@@ -138,12 +138,11 @@
       ],
     },
     {
-      id: "robin-identity", title: "Red Beard Studio — Robin Identity", reveal: "sketch", accent: "#b0262c",
+      id: "robin-identity", title: "Red Beard Studio — Brand Logo", reveal: "sketch", accent: "#b0262c",
       meta: [["Client", "Red Beard Studio"], ["Project", "Logo Design / Brand Applications"]],
       text: [
         "A logo designed for RB Studio (Red Beard Studio), a catering studio named after the robin bird, whose work brings together food, fashion and visual culture. The studio is closely connected to Robin, the café and bakery featured in the next two projects, so the same robin carries through all of this work.",
         "The mark is a loose, brush-drawn robin with the letters R and B doodled into the bird itself, so that the studio’s initials and its namesake form a single image. The hand-drawn line gives the identity a personal, handmade character.",
-        "The logo is used across brand applications, including stickers and logo placements, helping establish a distinctive and versatile visual presence.",
       ],
     },
     {
@@ -263,7 +262,7 @@
       },
     },
 
-    /* 05 Red Beard Studio — Robin Identity */
+    /* 05 Red Beard Studio — Brand Logo */
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },
 
     /* 06 Robin — Character Illustrations */
