@@ -160,6 +160,7 @@
       text: [
         "An illustrated visual identity developed for Robin's seasonal Easter packaging, featuring the robin bird alongside an elongated illustrative composition.",
         "The artwork was created for a special bucket packaging design for kozunak, a traditional Bulgarian sweet Easter bread.",
+        "The robin appears in two versions. The dotted bird from Robin’s logo is used on the buckets themselves, while for the flyers I sketched a looser, more playful bird by hand. A flyer was placed inside every bucket: one side carries the sketched bird and the words “better when shared”, the other a step-by-step illustration I drew to show how to enjoy the kozunak, from unwrapping and slicing it to spreading the jam and taking the first bite.",
         "The project combines illustration and seasonal storytelling to create a distinctive visual presentation for a traditional product, connecting cultural heritage with contemporary brand design.",
       ],
     },
@@ -275,8 +276,9 @@
     {
       slug: "robin-kozunak", series: "robin-kozunak", span: 12, title: "Kozunak Packaging", category: "Packaging illustration",
       cover: img("robin-lab.jpg", 1600, 428, "Two bakers carrying kozunak bread with a robin, and a scribbled robin with the line better when shared"),
-      // on the work's own page: the packaging in use
+      // on the work's own page: the back of the flyer, then the packaging in use
       gallery: [
+        { image: img("kozunak-flyer.jpg", 1699, 526, "Five numbered sketches on a grid: unwrapping the kozunak from its cloth, slicing it, a jar of jam, spreading the jam on a slice, and a woman in a beret taking a bite"), size: "full", caption: "The other side of the flyer: how to enjoy the kozunak" },
         { image: img("kozunak-bucket.jpg", 625, 825, "A metal kozunak bucket wrapped in the Robin Lab label, with the two bakers carrying bread"), size: "third", caption: "The kozunak bucket" },
         { image: img("kozunak-buckets.jpg", 619, 745, "Stacked kozunak buckets in a bakery kitchen, alternating the bakers illustration and the Better when shared side"), size: "third", caption: "In the kitchen" },
         { image: img("kozunak-buckets-stack.jpg", 660, 822, "A tall stack of kozunak buckets showing both sides of the label"), size: "third", caption: "Both sides of the label" },
