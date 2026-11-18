@@ -277,8 +277,9 @@
       cover: img("robin-lab.jpg", 1600, 428, "Two bakers carrying kozunak bread with a robin, and a scribbled robin with the line better when shared"),
       // on the work's own page: the packaging in use
       gallery: [
-        { image: img("kozunak-bucket.jpg", 1190, 1394, "A metal kozunak bucket wrapped in the Robin Lab label, with the two bakers carrying bread"), size: "half", caption: "The kozunak bucket" },
-        { image: img("kozunak-buckets.jpg", 1238, 1490, "Stacked kozunak buckets in a bakery kitchen, alternating the bakers illustration and the Better when shared side"), size: "half", caption: "Both sides of the label, in the kitchen" },
+        { image: img("kozunak-bucket.jpg", 625, 825, "A metal kozunak bucket wrapped in the Robin Lab label, with the two bakers carrying bread"), size: "third", caption: "The kozunak bucket" },
+        { image: img("kozunak-buckets.jpg", 619, 745, "Stacked kozunak buckets in a bakery kitchen, alternating the bakers illustration and the Better when shared side"), size: "third", caption: "In the kitchen" },
+        { image: img("kozunak-buckets-stack.jpg", 660, 822, "A tall stack of kozunak buckets showing both sides of the label"), size: "third", caption: "Both sides of the label" },
       ],
     },
   ];
