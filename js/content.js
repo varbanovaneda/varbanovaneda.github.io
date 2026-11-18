@@ -141,17 +141,17 @@
       id: "robin-identity", title: "Red Beard Studio — Brand Logo", reveal: "sketch", accent: "#b0262c",
       meta: [["Client", "Red Beard Studio"], ["Project", "Logo Design / Brand Applications"]],
       text: [
-        "A logo designed for RB Studio (Red Beard Studio), a catering studio named after the robin bird, whose work brings together food, fashion and visual culture. The studio is closely connected to Robin, the café and bakery featured in the next two projects, so the same robin carries through all of this work.",
+        "A logo designed for RB Studio (Red Beard Studio), a catering studio named after the robin bird, whose work brings together food, fashion and visual culture. The studio is closely connected to Robin, the café and bakery whose Easter packaging appears later in this portfolio, so the same robin carries through both projects.",
         "The mark is a loose, brush-drawn robin with the letters R and B doodled into the bird itself, so that the studio’s initials and its namesake form a single image. The hand-drawn line gives the identity a personal, handmade character.",
       ],
     },
     {
-      id: "robin-characters", title: "Robin — Character Illustrations", reveal: "sketch", accent: "#a9532f", phonePairs: true,
-      meta: [["Client", "Robin"], ["Project", "Character Design / Illustration"]],
+      id: "robin-characters", title: "Leak — Character Illustrations", reveal: "sketch", accent: "#a9532f", phonePairs: true,
+      meta: [["Client", "Leak — coffee, bakery & film projections (opening soon)"], ["Project", "Character Design / Illustration"]],
       text: [
-        "A pair of illustrated characters developed as part of the visual identity of Robin, a coffee and bakery place that also hosts film projections. The two girls embody both sides of the venue: one carries a coffee cup, the other a film reel.",
-        "Originally created as graphic concepts for T-shirts, the characters evolved into recognisable visual elements for the café and its team. They were incorporated into the brand's working environment and used to represent its baristas and staff.",
-        "The illustrations establish a playful, approachable character language that contributes to the wider personality of the Robin brand.",
+        "A set of illustrated characters for Leak, a coffee place, bakery and film-projection space that two friends are preparing to open. The two girls behind the project shared their vision with me, and I developed the characters to fit their whole concept: one carries a coffee cup, the other a film reel, bringing both sides of the venue together.",
+        "We worked closely together, refining the characters as they described the atmosphere and personality they wanted Leak to have. The designs are made to be worn by the staff as T-shirts, and to grow with the brand later through stickers and other branded pieces.",
+        "The result is a playful, approachable character language that gives Leak a recognisable personality before its doors even open.",
       ],
     },
     {
@@ -265,7 +265,7 @@
     /* 05 Red Beard Studio — Brand Logo */
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },
 
-    /* 06 Robin — Character Illustrations */
+    /* 06 Leak — Character Illustrations */
     { slug: "robin-characters-front", series: "robin-characters", span: 6, title: "The Baristas — Front", category: "Character design", cover: img("winter-walk-1.jpg", 1445, 1117, "Line illustration of two girls walking, one carrying a cup, one a film reel, front view") },
     { slug: "robin-characters-side", series: "robin-characters", span: 6, title: "The Baristas — Side", category: "Character design", cover: img("winter-walk-2.jpg", 1480, 1141, "Line illustration of the same two girls walking, side view") },
     { slug: "moka-break", series: "robin-characters", span: 6, title: "Moka Break", category: "Character design", cover: img("moka-break.jpg", 1600, 1200, "Line illustration of a man with a moka pot coffee maker") },
