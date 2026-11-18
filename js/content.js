@@ -279,6 +279,7 @@
       // on the work's own page: the back of the flyer, then the packaging in use
       gallery: [
         { image: img("kozunak-flyer.jpg", 1699, 526, "Five numbered sketches on a grid: unwrapping the kozunak from its cloth, slicing it, a jar of jam, spreading the jam on a slice, and a woman in a beret taking a bite"), size: "full", caption: "The other side of the flyer: how to enjoy the kozunak" },
+        { image: img("kozunak-flyer-coloured.jpg", 622, 804, "The instructions flyer coloured in with pencils, with coloured pencils lying on a wooden table"), size: "third-center", caption: "Drawn in outline, so children could colour it in" },
         { image: img("kozunak-bucket.jpg", 625, 825, "A metal kozunak bucket wrapped in the Robin Lab label, with the two bakers carrying bread"), size: "third", caption: "The kozunak bucket" },
         { image: img("kozunak-buckets.jpg", 619, 745, "Stacked kozunak buckets in a bakery kitchen, alternating the bakers illustration and the Better when shared side"), size: "third", caption: "In the kitchen" },
         { image: img("kozunak-buckets-stack.jpg", 660, 822, "A tall stack of kozunak buckets showing both sides of the label"), size: "third", caption: "Both sides of the label" },

@@ -598,6 +598,8 @@ html:not(.has-cursor) .card-cta {
 .shot[data-size="half"] { grid-column: span 6; }
 .shot[data-size="third"] { grid-column: span 4; }   /* smaller, three in a row */
 .shot[data-size="third"] .shot-media { aspect-ratio: 4 / 5 !important; }   /* equal heights */
+.shot[data-size="third-center"] { grid-column: 5 / span 4; }   /* the same size, centred on its own row */
+.shot[data-size="third-center"] + .shot { grid-column: 1 / span 4; }   /* what follows starts a new row */
 .shot[data-size="wide"] { grid-column: 3 / span 8; margin-block: clamp(32px, 6vw, 112px); }
 .shot-media { position: relative; overflow: hidden; border-radius: var(--radius); background: color-mix(in srgb, var(--black) 6%, var(--white)); }
 .shot-media img { width: 100%; height: 100%; object-fit: cover; }
