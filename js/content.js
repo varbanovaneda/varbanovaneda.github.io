@@ -109,8 +109,9 @@
       id: "watercolour", title: "Watercolour Studies", reveal: "wash", accent: "#c9577a",
       meta: [["Medium", "Watercolour"]],
       text: [
-        "A series of watercolour studies exploring the qualities and expressive possibilities of the medium. Developed during a dedicated study session, the collection features a variety of still-life compositions and landscapes, each painted exclusively using a square brush.",
-        "By limiting the tools and techniques, the exercise focused on exploring texture, colour interaction, layering and the spontaneous nature of watercolour. The square brush became a defining element of the process, creating an interesting visual language through its distinct marks and shapes.",
+        "A series of watercolour studies exploring the qualities and expressive possibilities of the medium. Developed during a dedicated study session, the collection features a variety of still-life compositions and landscapes, each painted exclusively with a square brush.",
+        "By limiting my tools and techniques, I focused on texture, colour interaction, layering and the spontaneous nature of watercolour. The square brush became the defining element of the process. Its distinct marks and shapes created their own visual language.",
+        "The brush also kept me from getting lost in fine detail. At the same time, I pushed myself to see how much detail I could still get out of it.",
       ],
     },
     {
@@ -179,7 +180,13 @@
     { slug: "persimmons", series: "watercolour", span: 4, title: "Persimmons", category: "Watercolour", cover: img("persimmons.jpg", 1600, 1165, "Watercolour of three persimmons with blue ornaments") },
     { slug: "figs-and-blueberries", series: "watercolour", span: 4, title: "Figs & Blueberries", category: "Watercolour", cover: img("figs-and-blueberries.jpg", 1600, 1159, "Watercolour of a halved fig on a blue patterned plate with blueberries") },
     { slug: "harvest", series: "watercolour", span: 4, title: "Harvest", category: "Watercolour", cover: img("harvest.jpg", 1148, 1600, "Watercolour still life of pumpkins, corn and a blue bowl") },
-    { slug: "plovdiv-musicians", series: "watercolour", span: 8, year: 2025, title: "Plovdiv Musicians", category: "Ink & wash", cover: img("plovdiv-musicians.jpg", 1600, 1104, "Ink and wash sketch of two guitarists in hats, Plovdiv 2025") },
+    {
+      slug: "plovdiv-musicians", series: "watercolour", span: 8, year: 2025, title: "Plovdiv Musicians", category: "Ink & wash",
+      description: [
+        "Unlike the rest of the series, this piece was made with a fine black liner marker. I then spread its ink with water, softening the lines into grey washes for a watercolour effect.",
+      ],
+      cover: img("plovdiv-musicians.jpg", 1600, 1104, "Ink and wash sketch of two guitarists in hats, Plovdiv 2025"),
+    },
 
     /* 02 I Want — Linocut Prints */
     {
