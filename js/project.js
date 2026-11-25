@@ -38,7 +38,7 @@
     ...(series ? [["Project", series.title]] : []),
     ...((series && series.meta) || []),
     ...(p.meta || []),
-    ...(p.year ? [["Year", p.year]] : []),
+    ...((p.year || (series && series.year)) ? [["Year", p.year || series.year]] : []),
   ];
   const cw = p.cover && p.cover.width ? p.cover.width : 4;
   const ch = p.cover && p.cover.height ? p.cover.height : 3;

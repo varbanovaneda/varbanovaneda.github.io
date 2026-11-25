@@ -7,7 +7,8 @@
   const main = $("#main");
   window.Site.mountChrome("home");
 
-  const info = (p) => [p.category, p.year].filter(Boolean).map(esc).join(" · ");
+  const yearOf = (p) => p.year || (SERIES.find((s) => s.id === p.series) || {}).year;
+  const info = (p) => [p.category, yearOf(p)].filter(Boolean).map(esc).join(" · ");
   const langAttr = (p) => (p.lang ? ` lang="${esc(p.lang)}"` : "");
   const ratio = (im) => (im && im.width ? `${im.width} / ${im.height}` : "4 / 5");
   const seriesOf = (p) => SERIES.find((s) => s.id === p.series);
@@ -100,7 +101,7 @@
               ${s.subtitle ? `<p class="series-subtitle">${esc(s.subtitle)}</p>` : ""}
             </div>
             <div class="series-body">
-              ${s.meta?.length ? `<dl class="series-meta">${s.meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
+              ${s.meta?.length || s.year ? `<dl class="series-meta">${[...(s.meta || []), ...(s.year ? [["Year", s.year]] : [])].map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
               ${lede ? `<p class="series-lede">${esc(lede)}</p>` : ""}
               ${s.link ? `<a class="series-link label" href="${esc(s.link.url)}" target="_blank" rel="noopener noreferrer">${roll(s.link.label)}<span aria-hidden="true">↗</span></a>` : ""}
               ${rest.length ? `<details class="series-more"><summary class="label"><span class="more-open">Read more</span><span class="more-close">Read less</span></summary>${rest.map((t) => `<p>${esc(t)}</p>`).join("")}</details>` : ""}
@@ -119,7 +120,7 @@
           <span class="ir-title"${langAttr(p)}>${esc(p.title)}</span>
           <span class="ir-cat label">${esc((seriesOf(p) || {}).title || p.category || "")}</span>
           <span class="ir-client label">${esc(p.category || "")}</span>
-          <span class="ir-year label">${esc(p.year || "")}</span>
+          <span class="ir-year label">${esc(yearOf(p) || "")}</span>
         </a>
       </li>`).join("");
   }

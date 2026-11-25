@@ -106,7 +106,7 @@
      accent: the colour of the watercolour bloom when you open one of its works. */
   window.SERIES = [
     {
-      id: "watercolour", title: "Watercolour Studies", reveal: "wash", accent: "#c9577a",
+      id: "watercolour", year: 2025, title: "Watercolour Studies", reveal: "wash", accent: "#c9577a",
       meta: [["Medium", "Watercolour"]],
       text: [
         "A series of watercolour studies exploring the qualities and expressive possibilities of the medium. Developed during a dedicated study session, the collection features a variety of still-life compositions and landscapes, each painted exclusively with a square brush.",
@@ -115,7 +115,7 @@
       ],
     },
     {
-      id: "i-want", title: "I Want — Linocut Prints", reveal: "print", accent: "#4f6f99",
+      id: "i-want", year: 2025, title: "I Want — Linocut Prints", reveal: "print", accent: "#4f6f99",
       meta: [["Medium", "Linocut / Printmaking"], ["Exhibition", "UNIART, New Bulgarian University"]],
       text: [
         "A two-part linocut series created for and shown in the UNIART exhibition at New Bulgarian University, under the theme I Want.",
@@ -126,21 +126,21 @@
       link: { label: "See the exhibition on UNIART", url: "https://www.uniart.bg/%D0%9E%D0%B1%D1%80%D0%B0%D0%B7%D0%B8+%D0%B8+%D0%BE%D1%82%D0%BF%D0%B5%D1%87%D0%B0%D1%82%D1%8A%D1%86%D0%B8%2B%2B%2B%2B%D0%A1%D1%8A%D0%B1%D0%B8%D1%82%D0%B8%D1%8F/1/MNevctKHY5KHcZOHYNWvcBe3Y1KLcBe-YVafMBebMZeXctKbcBafMJefYFefI5KHcNKT" },
     },
     {
-      id: "posters", title: "Poster Design", subtitle: "Frightening, Obscene Gesture & Power", reveal: "spray", accent: "#e0452e",
+      id: "posters", year: 2025, title: "Poster Design", subtitle: "Frightening, Obscene Gesture & Power", reveal: "spray", accent: "#e0452e",
       meta: [["Context", "Academic Project / Poster Design"]],
       text: [
         "A collection of three posters developed as part of a university assignment, exploring different visual interpretations of assigned themes through graphic communication and conceptual imagery.",
       ],
     },
     {
-      id: "puldin", title: "Puldin — Дивите козлета", subtitle: "Logo Design & T-Shirt Illustrations", reveal: "sketch", accent: "#5f7040",
+      id: "puldin", year: 2024, title: "Puldin — Дивите козлета", subtitle: "Logo Design & T-Shirt Illustrations", reveal: "sketch", accent: "#5f7040",
       meta: [["Client", "Puldin — Дивите козлета (The Wild Goats)"], ["Project", "Brand Identity / Logo Design / T-shirt Illustration"]],
       text: [
         "Three projects for Puldin — Дивите козлета (The Wild Goats), a tourism company inspired by the spirit of adventure, nature and mountain exploration: the company’s logo, a commemorative T-shirt for its marathon event, and a T-shirt for its trip to the Pyrenees.",
       ],
     },
     {
-      id: "robin-identity", title: "Red Beard Studio — Brand Logo", reveal: "sketch", accent: "#b0262c",
+      id: "robin-identity", year: 2026, title: "Red Beard Studio — Brand Logo", reveal: "sketch", accent: "#b0262c",
       meta: [["Client", "Red Beard Studio"], ["Project", "Logo Design / Brand Applications"]],
       text: [
         "A logo designed for RB Studio (Red Beard Studio), a catering studio named after the robin bird, whose work brings together food, fashion and visual culture. The studio is closely connected to Robin, the café and bakery whose Easter packaging appears later in this portfolio, so the same robin carries through both projects.",
@@ -148,7 +148,7 @@
       ],
     },
     {
-      id: "robin-characters", title: "Leak — Character Illustrations", reveal: "sketch", accent: "#a9532f", phonePairs: true,
+      id: "robin-characters", year: 2026, title: "Leak — Character Illustrations", reveal: "sketch", accent: "#a9532f", phonePairs: true,
       meta: [["Client", "Leak — coffee, bakery & film projections (opening soon)"], ["Project", "Character Design / Illustration"]],
       text: [
         "A set of illustrated characters for Leak, a coffee place, bakery and film-projection space that two friends are preparing to open. The two girls behind the project shared their vision with me, and I developed the characters to fit their whole concept: one carries a coffee cup, the other a film reel, bringing both sides of the venue together.",
@@ -157,13 +157,21 @@
       ],
     },
     {
-      id: "robin-kozunak", title: "Robin — Easter Kozunak Packaging", reveal: "sketch", accent: "#8a5330",
+      id: "robin-kozunak", year: 2026, title: "Robin — Easter Kozunak Packaging", reveal: "sketch", accent: "#8a5330",
       meta: [["Client", "Robin"], ["Project", "Packaging Illustration / Poster Design"]],
       text: [
         "An illustrated visual identity developed for Robin's seasonal Easter packaging, featuring the robin bird alongside an elongated illustrative composition.",
         "The artwork was created for a special bucket packaging design for kozunak, a traditional Bulgarian sweet Easter bread.",
         "The robin appears in two versions. The dotted bird from Robin’s logo is used on the buckets themselves, while for the flyers I sketched a looser, more playful bird by hand. A flyer was placed inside every bucket: one side carries the sketched bird and the words “better when shared”, the other a step-by-step illustration I drew to show how to enjoy the kozunak, from unwrapping and slicing it to spreading the jam and taking the first bite.",
         "The project combines illustration and seasonal storytelling to create a distinctive visual presentation for a traditional product, connecting cultural heritage with contemporary brand design.",
+      ],
+    },
+    {
+      id: "sketches", year: 2025, title: "Sketches & Studies", subtitle: "Dry chalk and pencil", reveal: "sketch", accent: "#5a5552",
+      meta: [["Medium", "Dry black chalk / Pencil"], ["Context", "Life drawing"]],
+      text: [
+        "A series of life drawings made in dry black chalk and pencil, each completed in twenty minutes to an hour, directly from the model.",
+        "Working with dry chalk, I studied both the material itself and drawing from life, aiming to capture each model with their own character.",
       ],
     },
   ];
@@ -179,7 +187,7 @@
     { slug: "figs-and-blueberries", series: "watercolour", span: 4, title: "Figs & Blueberries", category: "Watercolour", cover: img("figs-and-blueberries.jpg", 1568, 1135, "Watercolour of a halved fig on a blue patterned plate with blueberries") },
     { slug: "harvest", series: "watercolour", span: 4, title: "Harvest", category: "Watercolour", cover: img("harvest.jpg", 1074, 1552, "Watercolour still life of pumpkins, corn and a blue bowl") },
     {
-      slug: "plovdiv-musicians", series: "watercolour", span: 8, year: 2025, title: "Plovdiv Musicians", category: "Ink & wash",
+      slug: "plovdiv-musicians", series: "watercolour", span: 8, title: "Plovdiv Musicians", category: "Ink & wash",
       description: [
         "Unlike the rest of the series, this piece was made with a fine black liner marker. I then spread its ink with water, softening the lines into grey washes for a watercolour effect.",
       ],
@@ -188,7 +196,7 @@
 
     /* 02 I Want — Linocut Prints */
     {
-      slug: "bezpredelnost", series: "i-want", span: 7, year: 2026, lang: "bg", title: "Безпределност", category: "Linocut",
+      slug: "bezpredelnost", series: "i-want", span: 7, lang: "bg", title: "Безпределност", category: "Linocut",
       summary: "The boat, lost at sea.",
       cover: img("bezpredelnost.jpg", 1556, 1190, "Two-colour linocut print titled Bezpredelnost"),
     },
@@ -208,7 +216,7 @@
       cover: img("uzhas.jpg", 1200, 1600, "Black and white poster of a face made of framed fragments with red accents"),
     },
     {
-      slug: "obscene-gesture", series: "posters", span: 4, year: 2026, title: "Obscene Gesture", category: "Poster",
+      slug: "obscene-gesture", series: "posters", span: 4, title: "Obscene Gesture", category: "Poster",
       summary: "Street art and non-verbal communication.",
       meta: [["Theme", "Street Art & Non-verbal Communication"]],
       description: [
@@ -287,5 +295,10 @@
         { image: img("kozunak-buckets-stack.jpg", 660, 822, "A tall stack of kozunak buckets showing both sides of the label"), size: "third", caption: "Both sides of the label" },
       ],
     },
+
+    /* 08 Sketches & Studies */
+    { slug: "study-seated", series: "sketches", span: 4, title: "Seated Figure", category: "Dry chalk", cover: img("study-seated.jpg", 1116, 1600, "Dry chalk drawing of a woman sitting on a chair in an off-the-shoulder top, looking into the distance") },
+    { slug: "study-pencil", series: "sketches", span: 4, title: "Lost in Thought", category: "Pencil", cover: img("study-pencil.jpg", 920, 1325, "Pencil sketch of an older woman sitting forward on a stool, her chin resting on her hand") },
+    { slug: "study-portrait", series: "sketches", span: 4, title: "Portrait Study", category: "Dry chalk", cover: img("study-portrait.jpg", 1200, 1600, "Dry chalk portrait of a young woman with a ponytail, leaning on her arm and looking to the side") },
   ];
 })();
