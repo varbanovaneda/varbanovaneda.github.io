@@ -27,6 +27,7 @@ const PW = 297, PH = 210, PAD_X = 14, PAD_T = 12, PAD_B = 15;
 const CW = PW - 2 * PAD_X, CH = PH - PAD_T - PAD_B;      // content box 269 × 183
 const TEXT_W = 84, COL_GAP = 12, GAP = 6, CAP = 7;          // text column, gaps, caption height
 
+function build(measured = {}) {
 let pageNo = 0;
 const page = (inner, cls = "") =>
   `<section class="page ${cls}">${inner}<footer><span>${esc(S.name)} — Portfolio</span><span>${pad(++pageNo)}</span></footer></section>`;
@@ -84,25 +85,33 @@ pages.push(page(`
     </div>
   </div>`));
 
-/* sections */
+/* sections: the artwork fills the page, the text runs along the bottom */
+/* estimate the strip's height from its text: three columns of ~52 characters, 3.6 mm a line */
+function stripHeight(s, meta) {
+  const lines = (s.text || []).reduce((a, t) => a + Math.ceil(t.length / 50) + 0.6, 0) + (s.link ? 1.6 : 0);
+  const body = Math.ceil(lines / 3) * 3.65;
+  const head = 4 + Math.ceil(s.title.length / 24) * 7 + (s.subtitle ? 4 : 0) + meta.reduce((a, [, v]) => a + Math.ceil(String(v).length / 34) * 3.2, 0);
+  return Math.max(body, head) + 6;
+}
 SERIES.forEach((s, i) => {
   const works = P.filter((p) => p.series === s.id);
   const meta = [...(s.meta || []), ...(s.year ? [["Year", s.year]] : [])];
+  const STRIP = measured[i] != null ? measured[i] : stripHeight(s, meta);
   const split = works.length > 4 ? 3 : works.length;
-  pages.push(page(`
-    <div class="section">
-      <div class="section-text">
-        <span class="num display">${pad(i + 1)}</span>
+  const strip = `
+    <div class="strip" data-i="${i}">
+      <div class="strip-head">
+        <p class="label">${pad(i + 1)}</p>
         <h2 class="display">${esc(s.title)}</h2>
         ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
         <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-        <div class="body">${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}</div>
-        ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}
       </div>
-      <div class="works">${rowsOf(works.slice(0, split), CW - TEXT_W - COL_GAP, CH)}</div>
-    </div>`));
+      <div class="strip-body">${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
+        ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}</div>
+    </div>`;
+  pages.push(page(`<div class="works top" style="height:${(CH - STRIP - 5).toFixed(1)}mm">${rowsOf(works.slice(0, split), CW, CH - STRIP - 5)}</div>${strip}`));
   if (works.length > split) {
-    pages.push(page(`<div class="works full">${rowsOf(works.slice(split), CW, CH - 8)}</div><p class="label running">${pad(i + 1)} ${esc(s.title)} — continued</p>`));
+    pages.push(page(`<div class="works top">${rowsOf(works.slice(split), CW, CH - 10)}</div><p class="label running">${pad(i + 1)} ${esc(s.title)} — continued</p>`));
   }
 });
 
@@ -157,6 +166,16 @@ dl div { display: flex; justify-content: center; gap: 2.5mm; font-size: 8pt; } d
 .row figcaption span { opacity: .55; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 .running { position: absolute; left: 0; right: 0; bottom: 9mm; text-align: center; }
 
+/* artwork on top, text strip at the bottom */
+.page:not(:has(.strip)) .works.top { height: calc(100% - 10mm); }
+.strip { position: absolute; left: 14mm; right: 14mm; bottom: 13mm; display: grid; grid-template-columns: 62mm 1fr; gap: 9mm;
+  border-top: .25mm solid rgba(65,57,53,.18); padding-top: 3.5mm; }
+.strip-head h2 { font-size: 7mm; margin: .8mm 0 1mm; }
+.strip-head .sub { font-size: 7.4pt; opacity: .7; margin-bottom: 1.5mm; }
+.strip dl { margin: 0; padding: 0; border: 0; gap: .6mm; }
+.strip dl div { display: grid; grid-template-columns: 19mm 1fr; text-align: left; font-size: 6.8pt; gap: 0; }
+.strip-body { columns: 3; column-gap: 7mm; font-size: 7pt; line-height: 1.45; }
+.strip-body p { margin: 0 0 .55em; }
 /* closing */
 .closing { position: relative; height: 100%; }
 .closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
@@ -166,16 +185,24 @@ dl div { display: flex; justify-content: center; gap: 2.5mm; font-size: 8pt; } d
 .hand { font-family: Caveat, cursive; font-size: 22pt !important; line-height: 1.15; margin-bottom: 4mm; }
 </style></head><body>${pages.join("")}</body></html>`;
 
+return html;
+}
+
 (async () => {
   const out = path.join(ROOT, "portfolio.pdf");
   const tmp = path.join(ROOT, ".portfolio-print.html");
-  fs.writeFileSync(tmp, html);
   const b = await chromium.launch();
   const pg = await b.newPage();
+  // pass 1: measure each section's text strip; pass 2: lay the artwork out around it
+  fs.writeFileSync(tmp, build());
+  await pg.goto("file://" + tmp, { waitUntil: "networkidle" });
+  await pg.evaluate(() => document.fonts.ready);
+  const measured = await pg.evaluate(() => Object.fromEntries([...document.querySelectorAll(".strip")].map((e) => [e.dataset.i, e.getBoundingClientRect().height * 25.4 / 96 + 1])));
+  fs.writeFileSync(tmp, build(measured));
   await pg.goto("file://" + tmp, { waitUntil: "networkidle" });
   await pg.evaluate(() => document.fonts.ready);
   await pg.pdf({ path: out, width: `${PW}mm`, height: `${PH}mm`, printBackground: true, preferCSSPageSize: true });
   await b.close();
   fs.unlinkSync(tmp);
-  console.log(`${out}: ${pageNo} pages, ${(fs.statSync(out).size / 1e6).toFixed(1)} MB`);
+  console.log(`${out}: ${(fs.statSync(out).size / 1e6).toFixed(1)} MB`);
 })();
