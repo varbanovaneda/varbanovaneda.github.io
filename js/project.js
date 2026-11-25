@@ -61,6 +61,17 @@
     <section class="p-overview p-series" aria-labelledby="series-title">
       <h2 class="label" id="series-title">The project</h2>
       <div class="p-overview-body"><div class="p-desc" data-reveal>${seriesText.map((d) => `<p>${esc(d)}</p>`).join("")}</div>${seriesLink}</div>
+    </section>` : ""}
+    ${(p.process || []).length ? `
+    <section class="p-overview p-process" aria-labelledby="process-title">
+      <h2 class="label" id="process-title">Process</h2>
+      <div class="p-overview-body">
+        <div class="p-process-grid">${p.process.map((g) => `
+          <figure class="p-process-item" data-reveal>
+            <div class="p-process-media" style="aspect-ratio:${g.image.width} / ${g.image.height}">${imgTag(g.image, { sizes: "(max-width: 640px) 90vw, 36vw" })}</div>
+            ${g.caption ? `<figcaption class="label">${esc(g.caption)}</figcaption>` : ""}
+          </figure>`).join("")}</div>
+      </div>
     </section>` : ""}`;
 
   const gallery = (p.gallery || []).map((g, n) => `

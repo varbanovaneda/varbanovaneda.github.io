@@ -199,12 +199,12 @@
     {
       slug: "bezpredelnost", series: "i-want", span: 7, lang: "bg", title: "Безпределност", category: "Linocut",
       summary: "Boundlessness: the boat, lost at sea.",
-      cover: img("bezpredelnost.jpg", 1556, 1190, "Two-colour linocut print titled Bezpredelnost"),
+      process: [{ image: img("proc-bezpredelnost.jpg", 1047, 895, "Pencil sketchbook study of the boat's mast and the fender against mountains"), caption: "First sketch of the composition" }], cover: img("bezpredelnost.jpg", 1556, 1190, "Two-colour linocut print titled Bezpredelnost"),
     },
     {
       slug: "priboy", series: "i-want", span: 5, lang: "bg", title: "Прибой", category: "Linocut",
       summary: "Surf: the fender, drifting alongside it.",
-      cover: img("priboy.jpg", 1141, 1552, "Two-colour linocut of a rope knot and netted fender over water"),
+      process: [{ image: img("proc-priboy.jpg", 765, 1550, "Sketchbook page with two framed sketches of a fender at sea and handwritten notes"), caption: "Sketchbook notes and early ideas" }], cover: img("priboy.jpg", 1141, 1552, "Two-colour linocut of a rope knot and netted fender over water"),
     },
 
     /* 03 Poster Design */
@@ -283,10 +283,10 @@
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },
 
     /* 07 Leak — Character Illustrations */
-    { slug: "robin-characters-front", series: "robin-characters", span: 6, title: "The Baristas — Front", category: "Character design", cover: img("winter-walk-1.jpg", 1445, 1117, "Line illustration of two girls walking, one carrying a cup, one a film reel, front view") },
-    { slug: "robin-characters-side", series: "robin-characters", span: 6, title: "The Baristas — Side", category: "Character design", cover: img("winter-walk-2.jpg", 1480, 1141, "Line illustration of the same two girls walking, side view") },
+    { slug: "robin-characters-front", series: "robin-characters", span: 6, title: "The Baristas — Front", category: "Character design", process: [{ image: img("proc-baristas-front.jpg", 1600, 783, "Sketchbook spread of two girls walking in winter clothes, one carrying a bowl, one a film reel"), caption: "Early sketches of the two characters" }], cover: img("winter-walk-1.jpg", 1445, 1117, "Line illustration of two girls walking, one carrying a cup, one a film reel, front view") },
+    { slug: "robin-characters-side", series: "robin-characters", span: 6, title: "The Baristas — Side", category: "Character design", process: [{ image: img("proc-baristas-side.jpg", 1600, 808, "Sketchbook spread exploring the characters' poses, a film canister and details"), caption: "Exploring poses and details" }], cover: img("winter-walk-2.jpg", 1480, 1141, "Line illustration of the same two girls walking, side view") },
     { slug: "moka-break", series: "robin-characters", span: 6, title: "Moka Break", category: "Character design", cover: img("moka-break.jpg", 1600, 1200, "Line illustration of a man with a moka pot coffee maker"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
-    { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
+    { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", process: [{ image: img("proc-slow-morning.jpg", 1600, 784, "Sketchbook spread with the first drafts of the coffee characters"), caption: "First drafts of the characters" }], cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
 
     /* 08 Robin — Easter Kozunak Packaging */
     {
