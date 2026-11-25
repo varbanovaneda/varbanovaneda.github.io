@@ -1,6 +1,7 @@
 /* Builds portfolio.pdf (A4 landscape) from js/content.js, so the PDF always matches the website.
    Run from the repository root:  node tools/make-pdf.js
-   Needs Playwright (Chromium). Fonts load from Google Fonts. */
+   Layout: cover, about, one page per section (the watercolours on two), closing photo.
+   Artwork is sized in millimetres so each row of works fills the space with no dead areas. */
 const fs = require("fs"), path = require("path"), vm = require("vm");
 const { chromium } = require("playwright");
 
@@ -11,41 +12,71 @@ const { SITE: S, SERIES, PROJECTS: P } = ctx.window;
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const pad = (n) => String(n).padStart(2, "0");
-// a print-sized copy of each image (sharp at A4, small file)
 const file = (im, want = 1400) => {
   const base = im.src.replace(/^assets\/work\//, "").replace(/\.[^.]+$/, "");
-  for (const w of [want, 1200, 1000, 800]) {
+  for (const w of [want, 1400, 1200, 1000, 800]) {
     const p = path.join(ROOT, `assets/work/opt/${base}-${w}.jpg`);
     if (w <= want && fs.existsSync(p)) return "file://" + p;
   }
   return "file://" + path.join(ROOT, im.src);
 };
-const pic = (im, cls = "", want) => `<img class="${cls}" src="${file(im, want)}" alt="${esc(im.alt || "")}">`;
 const yearOf = (p) => p.year || (SERIES.find((s) => s.id === p.series) || {}).year || "";
 
+/* page geometry (mm) */
+const PW = 297, PH = 210, PAD_X = 14, PAD_T = 12, PAD_B = 15;
+const CW = PW - 2 * PAD_X, CH = PH - PAD_T - PAD_B;      // content box 269 × 183
+const TEXT_W = 84, COL_GAP = 12, GAP = 6, CAP = 7;          // text column, gaps, caption height
+
 let pageNo = 0;
-const page = (inner, cls = "") => `<section class="page ${cls}">${inner}<footer><span>${esc(S.name)} — Portfolio</span><span>${pad(++pageNo)}</span></footer></section>`;
+const page = (inner, cls = "") =>
+  `<section class="page ${cls}">${inner}<footer><span>${esc(S.name)} — Portfolio</span><span>${pad(++pageNo)}</span></footer></section>`;
+
+/* lay works out in justified rows that fill width W and fit height H */
+function fit(rows, W, H) {
+  const ar = (p) => p.cover.width / p.cover.height;
+  let hs = rows.map((r) => (W - GAP * (r.length - 1)) / r.reduce((a, p) => a + ar(p), 0));
+  const fixed = rows.length * CAP + GAP * (rows.length - 1);
+  const total = hs.reduce((a, b) => a + b, 0) + fixed;
+  if (total > H) { const k = (H - fixed) / (total - fixed); hs = hs.map((h) => h * k); }
+  // the smallest work decides: keeps every piece as large as possible, none tiny
+  const area = Math.min(...rows.flatMap((r, i) => r.map((p) => ar(p) * hs[i] * hs[i])));
+  return { rows, hs, area };
+}
+/* one row or two, whichever shows the artwork biggest */
+function rowsOf(list, W, H) {
+  const ar = (p) => p.cover.width / p.cover.height;
+  const options = [[list]];
+  if (list.length >= 2) {
+    const c = Math.ceil(list.length / 2);
+    options.push([list.slice(0, c), list.slice(c)]);
+    if (list.length === 3) options.push([list.slice(0, 1), list.slice(1)]);
+  }
+  const { rows, hs } = options.map((o) => fit(o, W, H)).sort((a, b) => b.area - a.area)[0];
+  return rows.map((r, i) => `<div class="row">${r.map((p) => {
+    const h = hs[i], w = ar(p) * h;
+    return `<figure style="width:${w.toFixed(1)}mm"><img src="${file(p.cover, w > 120 ? 1400 : 1000)}" style="width:${w.toFixed(1)}mm;height:${h.toFixed(1)}mm" alt="${esc(p.cover.alt || "")}">
+      <figcaption><b${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</b><span>${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</span></figcaption></figure>`;
+  }).join("")}</div>`).join("");
+}
 
 const pages = [];
 
 /* cover */
 pages.push(page(`
-  <div class="cover">
+  <div class="center cover">
     <p class="label">${esc(S.role)} — ${esc(S.location)}</p>
     <h1 class="display">${S.hero.lines.map(esc).join("<br>")}</h1>
     <p class="lede">${esc(S.hero.intro)}</p>
-    <ol class="toc">${SERIES.map((s, i) => `<li><span>${pad(i + 1)}</span>${esc(s.title)}<em>${esc(s.year || "")}</em></li>`).join("")}</ol>
-  </div>`, "is-cover"));
+    <p class="label">Portfolio · ${esc(S.email)} · varbanovaneda.github.io</p>
+  </div>`));
 
 /* about */
 const A = S.about;
 pages.push(page(`
-  <h2 class="label">About me</h2>
-  <div class="about">
-    <div>
-      <p class="intro">${esc(A.intro)}</p>
-      ${A.paragraphs.map((t) => `<p>${esc(t)}</p>`).join("")}
-    </div>
+  <div class="center about">
+    <p class="label">About me</p>
+    <p class="intro">${esc(A.intro)}</p>
+    <div class="about-text">${A.paragraphs.map((t) => `<p>${esc(t)}</p>`).join("")}</div>
     <div class="cols">
       <div><h3 class="label">What I do</h3><ul>${A.whatIDo.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
       <div><h3 class="label">Clients</h3><ul>${A.clients.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
@@ -53,15 +84,10 @@ pages.push(page(`
     </div>
   </div>`));
 
-/* each section on one page: its text and all its works (the watercolours take two pages) */
+/* sections */
 SERIES.forEach((s, i) => {
   const works = P.filter((p) => p.series === s.id);
   const meta = [...(s.meta || []), ...(s.year ? [["Year", s.year]] : [])];
-  const card = (p) => `<figure>${pic(p.cover, "", 1000)}<figcaption><b${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</b><span>${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</span></figcaption></figure>`;
-  const grid = (list) => {
-    const cols = list.length <= 3 ? list.length : 2, rows = Math.ceil(list.length / cols);
-    return `<div class="works" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${list.map(card).join("")}</div>`;
-  };
   const split = works.length > 4 ? 3 : works.length;
   pages.push(page(`
     <div class="section">
@@ -70,21 +96,23 @@ SERIES.forEach((s, i) => {
         <h2 class="display">${esc(s.title)}</h2>
         ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
         <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-        ${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
+        <div class="body">${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}</div>
         ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}
       </div>
-      ${grid(works.slice(0, split))}
+      <div class="works">${rowsOf(works.slice(0, split), CW - TEXT_W - COL_GAP, CH)}</div>
     </div>`));
-  if (works.length > split) pages.push(page(`<p class="label running">${pad(i + 1)} ${esc(s.title)}</p><div class="section only">${grid(works.slice(split))}</div>`));
+  if (works.length > split) {
+    pages.push(page(`<div class="works full">${rowsOf(works.slice(split), CW, CH - 8)}</div><p class="label running">${pad(i + 1)} ${esc(s.title)} — continued</p>`));
+  }
 });
 
 /* closing */
 pages.push(page(`
   <div class="closing">
-    ${S.creditImage ? pic(S.creditImage, "", 1400) : ""}
+    ${S.creditImage ? `<img src="${file(S.creditImage, 1400)}" alt="${esc(S.creditImage.alt || "")}">` : ""}
     <div class="closing-text">
-      <p>${esc(S.email)}<br>${esc(S.phone.label)}<br>${S.socials.map((s) => esc(s.handle || s.label)).join(" · ")}<br>varbanovaneda.github.io</p>
       <p class="hand">${esc(S.credit || "")}</p>
+      <p>${esc(S.email)} · ${esc(S.phone.label)} · ${S.socials.map((s) => esc(s.handle || s.label)).join(" · ")} · varbanovaneda.github.io</p>
     </div>
   </div>`));
 
@@ -93,95 +121,49 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <style>
 @page { size: A4 landscape; margin: 0; }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: #FAFAFA; color: #413935; font: 400 9.6pt/1.5 Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.page { width: 297mm; height: 210mm; padding: 13mm 14mm 16mm; position: relative; overflow: hidden; page-break-after: always; break-after: page; }
-footer { position: absolute; left: 14mm; right: 14mm; bottom: 7mm; display: flex; justify-content: space-between; font-size: 7pt; letter-spacing: .06em; text-transform: uppercase; opacity: .5; }
-.display { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; line-height: .9; letter-spacing: -.01em; margin: 0; }
-.label { font-size: 7pt; letter-spacing: .08em; text-transform: uppercase; opacity: .6; margin: 0; font-weight: 500; }
-p { margin: 0 0 .7em; }
-img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 2.5mm; }
-.running { position: absolute; top: 9mm; left: 14mm; }
-/* cover */
-.cover { height: 100%; display: flex; flex-direction: column; }
-.cover h1 { font-size: 46mm; margin-top: 6mm; }
-.cover .lede { max-width: 120mm; font-size: 11pt; margin-top: 6mm; }
-.toc { list-style: none; padding: 0; margin: auto 0 0; columns: 2; column-gap: 14mm; border-top: .3mm solid rgba(65,57,53,.2); padding-top: 4mm; }
-.toc li { display: flex; gap: 4mm; padding: 1.2mm 0; break-inside: avoid; }
-.toc li span { opacity: .5; width: 7mm; } .toc li em { margin-left: auto; font-style: normal; opacity: .5; }
-/* about */
-.about { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14mm; margin-top: 8mm; }
-.about .intro { font-size: 15pt; line-height: 1.3; font-weight: 500; letter-spacing: -.01em; }
-.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; align-content: start; }
-.cols ul { list-style: none; padding: 0; margin: 2mm 0 0; } .cols li { padding: 1.4mm 0; border-top: .3mm solid rgba(65,57,53,.15); }
-/* section opener */
-.series { display: grid; grid-template-columns: 88mm 1fr; gap: 10mm; height: 100%; }
-.series-text { font-size: 8.8pt; overflow: hidden; }
-.series-text .num { font-size: 22mm; opacity: .2; display: block; }
-.series-text h2 { font-size: 13mm; margin: 2mm 0 2mm; }
-.series-text .sub { opacity: .7; font-size: 10pt; }
-dl { margin: 4mm 0 5mm; display: grid; gap: 1.4mm; } dl div { display: grid; grid-template-columns: 22mm 1fr; } dd { margin: 0; }
-.link { font-size: 7.5pt; } .link a { color: inherit; }
-.grid { display: grid; gap: 6mm; align-items: end; height: 100%; }
-.grid.n1 { grid-template-columns: 1fr; } .grid.n2 { grid-template-columns: 1fr 1fr; } .grid.n3 { grid-template-columns: 1fr 1fr 1fr; } .grid.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.grid.wide { height: calc(100% - 6mm); margin-top: 6mm; gap: 12mm; } .grid.wide .work { align-items: center; } .grid.wide .work img { margin: 0 auto; }
-.work { margin: 0; display: flex; flex-direction: column; height: 100%; justify-content: flex-end; min-height: 0; }
-.work img { width: auto; height: auto; max-width: 100%; max-height: 158mm; margin: 0 auto 0 0; }
-.grid.n4:not(.wide) .work img { max-height: 70mm; }
-.grid.wide .work img { max-height: 165mm; }
-.work figcaption { margin-top: 2.5mm; display: flex; justify-content: space-between; gap: 3mm; font-size: 8pt; }
-.work figcaption b { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 11pt; line-height: 1; }
-.work figcaption span { opacity: .55; font-size: 7pt; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
-/* work detail */
-.detail { display: grid; grid-template-columns: 1.1fr 1fr; gap: 10mm; height: calc(100% - 4mm); margin-top: 4mm; }
-.detail-main { display: flex; align-items: center; justify-content: center; min-height: 0; }
-.detail-main img { width: auto; height: auto; max-width: 100%; max-height: 172mm; }
-.detail-text { font-size: 8.8pt; overflow: hidden; display: flex; flex-direction: column; }
-.detail-text h3 { font-size: 11mm; margin-bottom: 2mm; }
-.detail-text .label { margin-bottom: 4mm; }
-.summary { font-size: 12pt; font-weight: 500; line-height: 1.3; }
-.extras { margin-top: auto; display: flex; flex-wrap: wrap; gap: 4mm; align-items: flex-end; }
-.extras figure { margin: 0; flex: 1 1 0; min-width: 28mm; }
-.extras img { height: 38mm; width: auto; max-width: 100%; }
-.extras figcaption { margin-top: 1.5mm; font-size: 6pt; }
-/* a page of extra images */
-.spread { display: flex; flex-direction: column; gap: 6mm; height: calc(100% - 4mm); margin-top: 6mm; }
-.spread figure { margin: 0; } .spread figcaption { margin-top: 1.5mm; font-size: 6.5pt; }
-.spread-wide img { width: 100%; max-height: 72mm; object-fit: contain; }
-.spread-row { display: flex; gap: 5mm; justify-content: space-between; align-items: flex-end; flex: 1; min-height: 0; }
-.spread-row figure { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; }
-.spread-row img { width: 100%; height: 78mm; object-fit: cover; }
-/* section intro */
-.intro-page { height: 100%; display: flex; flex-direction: column; justify-content: center; max-width: 175mm; }
-.intro-page .num { font-size: 30mm; opacity: .2; }
-.intro-page h2 { font-size: 22mm; margin: 2mm 0 3mm; }
-.intro-page .sub { font-size: 12pt; opacity: .7; }
-.intro-text { columns: 2; column-gap: 10mm; font-size: 9.6pt; }
-/* one work per page */
-.one { display: grid; grid-template-columns: 1fr 70mm; gap: 12mm; height: 100%; align-items: center; }
-.one-img { height: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
-.one-img img { width: auto; height: auto; max-width: 100%; max-height: 178mm; }
-.one-text { align-self: end; font-size: 9pt; padding-bottom: 2mm; }
-.one-text h3 { font-size: 11mm; margin: 2mm 0 2mm; }
-.one-text .label + .display + .label { margin-bottom: 4mm; }
+html, body { margin: 0; background: #FAFAFA; color: #413935; font: 400 9pt/1.55 Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.page { width: ${PW}mm; height: ${PH}mm; padding: ${PAD_T}mm ${PAD_X}mm ${PAD_B}mm; position: relative; overflow: hidden; break-after: page; }
+footer { position: absolute; left: ${PAD_X}mm; right: ${PAD_X}mm; bottom: 6mm; display: flex; justify-content: space-between; font-size: 6.5pt; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
+.display { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; line-height: .92; letter-spacing: -.005em; margin: 0; }
+.label { font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin: 0; font-weight: 500; }
+p { margin: 0 0 .75em; }
+img { display: block; object-fit: cover; border-radius: 1.8mm; }
+
+/* centred pages */
+.center { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.cover h1 { font-size: 40mm; margin: 6mm 0 7mm; }
+.cover .lede { max-width: 130mm; font-size: 11.5pt; line-height: 1.45; margin-bottom: 10mm; }
+.about .intro { max-width: 190mm; font-size: 16pt; line-height: 1.3; font-weight: 500; letter-spacing: -.012em; margin: 4mm 0 6mm; }
+.about-text { max-width: 175mm; font-size: 9.5pt; }
+.cols { display: grid; grid-template-columns: repeat(3, 58mm); gap: 10mm; margin-top: 8mm; text-align: center; }
+.cols ul { list-style: none; padding: 0; margin: 2.5mm 0 0; } .cols li { padding: 1.3mm 0; border-top: .25mm solid rgba(65,57,53,.15); font-size: 8.6pt; }
+
 /* section pages */
-.section { display: grid; grid-template-columns: 78mm 1fr; gap: 10mm; height: 100%; }
-.section.only { grid-template-columns: 1fr; height: calc(100% - 4mm); margin-top: 4mm; }
-.section-text { font-size: 8.2pt; overflow: hidden; }
-.section-text .num { font-size: 18mm; opacity: .2; display: block; }
-.section-text h2 { font-size: 11mm; margin: 1mm 0 2mm; }
-.section-text .sub { opacity: .7; font-size: 9.5pt; }
-.works { display: grid; gap: 7mm; min-height: 0; height: 100%; }
-.works figure { margin: 0; display: flex; flex-direction: column; min-height: 0; }
-.works img { flex: 1; min-height: 0; width: 100%; height: 100%; object-fit: contain; object-position: left bottom; border-radius: 0; }
-.works figcaption { margin-top: 2mm; display: flex; justify-content: space-between; gap: 3mm; font-size: 7pt; }
-.works figcaption b { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 10pt; line-height: 1; }
-.works figcaption span { opacity: .55; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.section { display: grid; grid-template-columns: ${TEXT_W}mm 1fr; gap: ${COL_GAP}mm; height: 100%; }
+.section-text { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 0; }
+.section-text .num { font-size: 14mm; opacity: .18; }
+.section-text h2 { font-size: 12.5mm; margin: 1.5mm 0 2.5mm; text-wrap: balance; }
+.section-text .sub { font-size: 9.5pt; opacity: .7; margin-bottom: 3mm; }
+dl { margin: 1mm 0 4mm; padding: 2.5mm 0; border-top: .25mm solid rgba(65,57,53,.15); border-bottom: .25mm solid rgba(65,57,53,.15); width: 100%; display: grid; gap: 1.2mm; }
+dl div { display: flex; justify-content: center; gap: 2.5mm; font-size: 8pt; } dt { padding-top: .5mm; } dd { margin: 0; }
+.body { font-size: 8.4pt; line-height: 1.55; text-wrap: pretty; }
+.link { font-size: 7.5pt; } .link a { color: inherit; }
+.works { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: ${GAP}mm; min-height: 0; }
+.works.full { height: calc(100% - 8mm); }
+.row { display: flex; gap: ${GAP}mm; justify-content: center; align-items: flex-end; }
+.row figure { margin: 0; }
+.row figcaption { height: ${CAP}mm; padding-top: 1.8mm; display: flex; justify-content: space-between; gap: 2mm; font-size: 6.4pt; }
+.row figcaption b { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 9.5pt; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row figcaption span { opacity: .55; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.running { position: absolute; left: 0; right: 0; bottom: 9mm; text-align: center; }
+
 /* closing */
 .closing { position: relative; height: 100%; }
 .closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
-.closing-text { position: absolute; top: 0; left: 0; padding: 12mm; color: #FAFAFA; max-width: 60%; background: radial-gradient(120% 100% at 0 0, rgba(28,23,21,.55), transparent 70%); }
-.closing-text h2 { font-size: 20mm; margin-bottom: 6mm; }
-.hand { font-family: Caveat, cursive; font-size: 17pt; line-height: 1.2; margin-top: 4mm; }
+.closing-text { position: absolute; inset: 0 0 auto; padding: 14mm 30mm 26mm; color: #FAFAFA; text-align: center; border-radius: 3mm 3mm 0 0;
+  background: linear-gradient(180deg, rgba(28,23,21,.6), rgba(28,23,21,.25) 65%, transparent); }
+.closing-text p { font-size: 8.5pt; letter-spacing: .02em; }
+.hand { font-family: Caveat, cursive; font-size: 22pt !important; line-height: 1.15; margin-bottom: 4mm; }
 </style></head><body>${pages.join("")}</body></html>`;
 
 (async () => {
@@ -192,7 +174,7 @@ dl { margin: 4mm 0 5mm; display: grid; gap: 1.4mm; } dl div { display: grid; gri
   const pg = await b.newPage();
   await pg.goto("file://" + tmp, { waitUntil: "networkidle" });
   await pg.evaluate(() => document.fonts.ready);
-  await pg.pdf({ path: out, width: "297mm", height: "210mm", printBackground: true, preferCSSPageSize: true });
+  await pg.pdf({ path: out, width: `${PW}mm`, height: `${PH}mm`, printBackground: true, preferCSSPageSize: true });
   await b.close();
   fs.unlinkSync(tmp);
   console.log(`${out}: ${pageNo} pages, ${(fs.statSync(out).size / 1e6).toFixed(1)} MB`);
