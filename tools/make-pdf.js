@@ -24,7 +24,7 @@ const file = (im, want = 1400) => {
 const { execFileSync } = require("child_process");
 const CACHE = path.join(ROOT, "tools/.pdf-cache");
 fs.mkdirSync(CACHE, { recursive: true });
-const DPI = 150;
+const DPI = 200;
 const printed = (im, mm) => {
   const px = Math.min(im.width, Math.ceil((mm / 25.4) * DPI));
   const out = path.join(CACHE, `${path.basename(im.src).replace(/\.[^.]+$/, "")}-${px}.jpg`);
@@ -34,9 +34,9 @@ const printed = (im, mm) => {
 const yearOf = (p) => p.year || (SERIES.find((s) => s.id === p.series) || {}).year || "";
 
 /* page geometry (mm) */
-const PW = 297, PH = 210, PAD_X = 14, PAD_T = 12, PAD_B = 15;
+const PW = 297, PH = 210, PAD_X = 9, PAD_T = 8, PAD_B = 11;
 const CW = PW - 2 * PAD_X, CH = PH - PAD_T - PAD_B;      // content box 269 × 183
-const TEXT_W = 84, COL_GAP = 12, GAP = 6, CAP = 7;          // text column, gaps, caption height
+const TEXT_W = 84, COL_GAP = 12, GAP = 4.5, CAP = 6;          // text column, gaps, caption height
 
 function build(measured = {}) {
 let pageNo = 0;
@@ -73,34 +73,31 @@ function rowsOf(list, W, H) {
 
 const pages = [];
 
-/* cover */
-pages.push(page(`
-  <div class="center cover">
-    <p class="label">${esc(S.role)} — ${esc(S.location)}</p>
-    <h1 class="display">${S.hero.lines.map(esc).join("<br>")}</h1>
-    <p class="lede">${esc(S.hero.intro)}</p>
-    <p class="label">Portfolio · ${esc(S.email)} · varbanovaneda.github.io</p>
-  </div>`));
-
-/* about */
+/* cover, with the about text */
 const A = S.about;
 pages.push(page(`
-  <div class="center about">
-    <p class="label">About me</p>
-    <p class="intro">${esc(A.intro)}</p>
-    <div class="about-text">${A.paragraphs.map((t) => `<p>${esc(t)}</p>`).join("")}</div>
-    <div class="cols">
-      <div><h3 class="label">What I do</h3><ul>${A.whatIDo.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
-      <div><h3 class="label">Clients</h3><ul>${A.clients.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
-      <div><h3 class="label">Contact</h3><ul><li>${esc(S.email)}</li><li>${esc(S.phone.label)}</li>${S.socials.map((s) => `<li>${esc(s.label)} ${esc(s.handle || "")}</li>`).join("")}<li>varbanovaneda.github.io</li></ul></div>
+  <div class="cover">
+    <div class="cover-left">
+      <p class="label">${esc(S.role)} — ${esc(S.location)}</p>
+      <h1 class="display">${S.hero.lines.map(esc).join("<br>")}</h1>
+      <p class="lede">${esc(S.hero.intro)}</p>
+    </div>
+    <div class="cover-right">
+      <p class="intro">${esc(A.intro)}</p>
+      ${A.paragraphs.map((t) => `<p>${esc(t)}</p>`).join("")}
+      <div class="cols">
+        <div><h3 class="label">What I do</h3><ul>${A.whatIDo.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div><h3 class="label">Clients</h3><ul>${A.clients.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div><h3 class="label">Contact</h3><ul><li>${esc(S.email)}</li><li>${esc(S.phone.label)}</li>${S.socials.map((s) => `<li>${esc(s.handle || s.label)}</li>`).join("")}<li><a href="https://varbanovaneda.github.io/">varbanovaneda.github.io</a></li></ul></div>
+      </div>
     </div>
   </div>`));
 
 /* sections: the artwork fills the page, the text runs along the bottom */
 /* estimate the strip's height from its text: three columns of ~52 characters, 3.6 mm a line */
 function stripHeight(s, meta) {
-  const lines = (s.text || []).reduce((a, t) => a + Math.ceil(t.length / 50) + 0.6, 0) + (s.link ? 1.6 : 0);
-  const body = Math.ceil(lines / 3) * 3.65;
+  const lines = (s.text || []).reduce((a, t) => a + Math.ceil(t.length / 46) + 0.6, 0) + (s.link ? 1.6 : 0);
+  const body = Math.ceil(lines / 4) * 3.4;
   const head = 4 + Math.ceil(s.title.length / 24) * 7 + (s.subtitle ? 4 : 0) + meta.reduce((a, [, v]) => a + Math.ceil(String(v).length / 34) * 3.2, 0);
   return Math.max(body, head) + 6;
 }
@@ -135,7 +132,7 @@ pages.push(page(`
       <p class="site"><a href="https://varbanovaneda.github.io/">varbanovaneda.github.io</a></p>
     </div>
     <div class="closing-contact">${esc(S.email)} · ${esc(S.phone.label)} · ${S.socials.map((s) => `${esc(s.label)} ${esc(s.handle || "")}`).join(" · ")}</div>
-  </div>`));
+  </div>`, "bleed"));
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans+Extra+Condensed:wght@600;700;800&family=Inter:opsz,wght@14..32,300..700&family=Caveat:wght@400..600&display=swap">
@@ -144,20 +141,21 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 * { box-sizing: border-box; }
 html, body { margin: 0; background: #FAFAFA; color: #413935; font: 400 9pt/1.55 Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .page { background-image: url("file://${path.join(ROOT, "tools/grain.png")}"); background-size: 64mm 64mm; width: ${PW}mm; height: ${PH}mm; padding: ${PAD_T}mm ${PAD_X}mm ${PAD_B}mm; position: relative; overflow: hidden; break-after: page; }
-footer { position: absolute; left: ${PAD_X}mm; right: ${PAD_X}mm; bottom: 6mm; display: flex; justify-content: space-between; font-size: 6.5pt; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
+footer { position: absolute; left: ${PAD_X}mm; right: ${PAD_X}mm; bottom: 4mm; display: flex; justify-content: space-between; font-size: 6.5pt; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
 .display { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; line-height: .92; letter-spacing: -.005em; margin: 0; }
 .label { font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin: 0; font-weight: 500; }
 p { margin: 0 0 .75em; }
 img { display: block; object-fit: cover; border-radius: 1.8mm; }
 
 /* centred pages */
-.center { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.cover h1 { font-size: 40mm; margin: 6mm 0 7mm; }
-.cover .lede { max-width: 130mm; font-size: 11.5pt; line-height: 1.45; margin-bottom: 10mm; }
-.about .intro { max-width: 190mm; font-size: 16pt; line-height: 1.3; font-weight: 500; letter-spacing: -.012em; margin: 4mm 0 6mm; }
-.about-text { max-width: 175mm; font-size: 9.5pt; }
-.cols { display: grid; grid-template-columns: repeat(3, 58mm); gap: 10mm; margin-top: 8mm; text-align: center; }
-.cols ul { list-style: none; padding: 0; margin: 2.5mm 0 0; } .cols li { padding: 1.3mm 0; border-top: .25mm solid rgba(65,57,53,.15); font-size: 8.6pt; }
+.cover { height: 100%; display: grid; grid-template-columns: 112mm 1fr; gap: 14mm; align-items: center; padding: 0 6mm; }
+.cover h1 { font-size: 25mm; margin: 4mm 0 6mm; }
+.cover .lede { font-size: 11pt; line-height: 1.45; max-width: 105mm; }
+.cover-right { font-size: 8pt; line-height: 1.5; }
+.cover-right .intro { font-size: 12pt; line-height: 1.3; font-weight: 500; letter-spacing: -.01em; }
+.cover-right a { color: inherit; }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 5mm; }
+.cols ul { list-style: none; padding: 0; margin: 2mm 0 0; } .cols li { padding: 1mm 0; border-top: .25mm solid rgba(65,57,53,.15); font-size: 7.6pt; }
 
 /* section pages */
 .section { display: grid; grid-template-columns: ${TEXT_W}mm 1fr; gap: ${COL_GAP}mm; height: 100%; }
@@ -180,21 +178,22 @@ dl div { display: flex; justify-content: center; gap: 2.5mm; font-size: 8pt; } d
 
 /* artwork on top, text strip at the bottom */
 .page:not(:has(.strip)) .works.top { height: calc(100% - 10mm); }
-.strip { position: absolute; left: 14mm; right: 14mm; bottom: 13mm; display: grid; grid-template-columns: 62mm 1fr; gap: 9mm;
-  border-top: .25mm solid rgba(65,57,53,.18); padding-top: 3.5mm; }
-.strip-head h2 { font-size: 7mm; margin: .8mm 0 1mm; }
+.strip { position: absolute; left: ${PAD_X}mm; right: ${PAD_X}mm; bottom: 9mm; display: grid; grid-template-columns: 56mm 1fr; gap: 7mm;
+  border-top: .25mm solid rgba(65,57,53,.18); padding-top: 2.5mm; }
+.strip-head h2 { font-size: 6mm; margin: .8mm 0 1mm; }
 .strip-head .sub { font-size: 7.4pt; opacity: .7; margin-bottom: 1.5mm; }
 .strip dl { margin: 0; padding: 0; border: 0; gap: .6mm; }
 .strip dl div { display: grid; grid-template-columns: 19mm 1fr; text-align: left; font-size: 6.8pt; gap: 0; }
-.strip-body { columns: 3; column-gap: 7mm; font-size: 7pt; line-height: 1.45; }
+.strip-body { columns: 4; column-gap: 6mm; font-size: 6.7pt; line-height: 1.42; }
 .strip-body p { margin: 0 0 .55em; }
 /* closing */
+.page.bleed { padding: 0; } .page.bleed footer { display: none; }
 .closing { position: relative; height: 100%; }
-.closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
-.closing-text { position: absolute; inset: 0 0 auto; padding: 14mm 30mm 26mm; color: #FAFAFA; text-align: center; border-radius: 3mm 3mm 0 0;
+.closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+.closing-text { position: absolute; inset: 0 0 auto; padding: 14mm 30mm 26mm; color: #FAFAFA; text-align: center; 
   background: linear-gradient(180deg, rgba(28,23,21,.6), rgba(28,23,21,.25) 65%, transparent); }
 .closing-text .site a { color: inherit; font-size: 10pt; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; border-bottom: .3mm solid rgba(250,250,250,.6); }
-.closing-contact { position: absolute; inset: auto 0 0; padding: 26mm 20mm 9mm; text-align: center; color: #FAFAFA; font-size: 9pt; letter-spacing: .03em; border-radius: 0 0 3mm 3mm;
+.closing-contact { position: absolute; inset: auto 0 0; padding: 26mm 20mm 9mm; text-align: center; color: #FAFAFA; font-size: 9pt; letter-spacing: .03em; 
   background: linear-gradient(0deg, rgba(28,23,21,.6), rgba(28,23,21,.2) 65%, transparent); }
 .hand { font-family: Caveat, cursive; font-size: 22pt !important; line-height: 1.15; margin-bottom: 4mm; }
 </style></head><body>${pages.join("")}</body></html>`;
