@@ -120,9 +120,10 @@ pages.push(page(`
   <div class="closing">
     ${S.creditImage ? `<img src="${file(S.creditImage, 1400)}" alt="${esc(S.creditImage.alt || "")}">` : ""}
     <div class="closing-text">
-      <p class="hand">${esc(S.credit || "")}</p>
-      <p>${esc(S.email)} · ${esc(S.phone.label)} · ${S.socials.map((s) => esc(s.handle || s.label)).join(" · ")} · varbanovaneda.github.io</p>
+      <p class="hand">For the full experience of my portfolio, open the website: it is part of my creative work, designed and built by me :)</p>
+      <p class="site"><a href="https://varbanovaneda.github.io/">varbanovaneda.github.io</a></p>
     </div>
+    <div class="closing-contact">${esc(S.email)} · ${esc(S.phone.label)} · ${S.socials.map((s) => `${esc(s.label)} ${esc(s.handle || "")}`).join(" · ")}</div>
   </div>`));
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -131,7 +132,7 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 @page { size: A4 landscape; margin: 0; }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: #FAFAFA; color: #413935; font: 400 9pt/1.55 Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.page { width: ${PW}mm; height: ${PH}mm; padding: ${PAD_T}mm ${PAD_X}mm ${PAD_B}mm; position: relative; overflow: hidden; break-after: page; }
+.page { background-image: url("file://${path.join(ROOT, "tools/grain.png")}"); background-size: 64mm 64mm; width: ${PW}mm; height: ${PH}mm; padding: ${PAD_T}mm ${PAD_X}mm ${PAD_B}mm; position: relative; overflow: hidden; break-after: page; }
 footer { position: absolute; left: ${PAD_X}mm; right: ${PAD_X}mm; bottom: 6mm; display: flex; justify-content: space-between; font-size: 6.5pt; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
 .display { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; line-height: .92; letter-spacing: -.005em; margin: 0; }
 .label { font-size: 6.8pt; letter-spacing: .1em; text-transform: uppercase; opacity: .6; margin: 0; font-weight: 500; }
@@ -181,7 +182,9 @@ dl div { display: flex; justify-content: center; gap: 2.5mm; font-size: 8pt; } d
 .closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
 .closing-text { position: absolute; inset: 0 0 auto; padding: 14mm 30mm 26mm; color: #FAFAFA; text-align: center; border-radius: 3mm 3mm 0 0;
   background: linear-gradient(180deg, rgba(28,23,21,.6), rgba(28,23,21,.25) 65%, transparent); }
-.closing-text p { font-size: 8.5pt; letter-spacing: .02em; }
+.closing-text .site a { color: inherit; font-size: 10pt; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; border-bottom: .3mm solid rgba(250,250,250,.6); }
+.closing-contact { position: absolute; inset: auto 0 0; padding: 26mm 20mm 9mm; text-align: center; color: #FAFAFA; font-size: 9pt; letter-spacing: .03em; border-radius: 0 0 3mm 3mm;
+  background: linear-gradient(0deg, rgba(28,23,21,.6), rgba(28,23,21,.2) 65%, transparent); }
 .hand { font-family: Caveat, cursive; font-size: 22pt !important; line-height: 1.15; margin-bottom: 4mm; }
 </style></head><body>${pages.join("")}</body></html>`;
 
