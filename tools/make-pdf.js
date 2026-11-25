@@ -53,71 +53,28 @@ pages.push(page(`
     </div>
   </div>`));
 
-/* each section: an opening page with its text and works, then a page for every work that has more to show */
+/* each section: a text page, then every work once, one per page */
 SERIES.forEach((s, i) => {
   const works = P.filter((p) => p.series === s.id);
   const meta = [...(s.meta || []), ...(s.year ? [["Year", s.year]] : [])];
-  const card = (p) => `<figure class="work">${pic(p.cover, "", 1000)}<figcaption><b${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</b><span>${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</span></figcaption></figure>`;
-  const extrasOf = (p) => [
-    ...(p.process || []).map((g) => ({ ...g, kind: "Process" })),
-    ...(p.gallery || []).map((g) => ({ ...g, kind: "" })),
-    ...((p.scroll && p.scroll.items) || []).filter((g) => g.image.src !== p.cover.src).map((g) => ({ ...g, kind: "" })),
-  ];
-  const detailed = (p) => (p.description || []).length || extrasOf(p).length;
-  const plain = works.filter((p) => !detailed(p));
-  // works without their own page are shown two to a page, large; the opener holds the first two
-  // (or, if every work has its own page, a small preview of the section)
-  const first = plain.length ? plain.slice(0, 2) : works.slice(0, 3);
   pages.push(page(`
-    <div class="series">
-      <div class="series-text">
-        <span class="num display">${pad(i + 1)}</span>
-        <h2 class="display">${esc(s.title)}</h2>
-        ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
-        <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-        ${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
-        ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} (uniart.bg) ↗</a></p>` : ""}
-      </div>
-      <div class="grid n${first.length}">${first.map(card).join("")}</div>
+    <div class="intro-page">
+      <span class="num display">${pad(i + 1)}</span>
+      <h2 class="display">${esc(s.title)}</h2>
+      ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
+      <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+      <div class="intro-text">${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
+      ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}</div>
     </div>`));
-  for (let k = plain.length ? first.length : plain.length; k < plain.length; k += 2) {
-    const group = plain.slice(k, k + 2);
-    pages.push(page(`<p class="label running">${pad(i + 1)} ${esc(s.title)}</p><div class="grid wide n${group.length}">${group.map(card).join("")}</div>`));
-  }
   works.forEach((p) => {
-    const extra = extrasOf(p);
-    if (!detailed(p)) return;
-    // many extra images: the work and its text on one page, the extras large on the next
-    if (extra.length > 3) {
-      pages.push(page(`
-        <p class="label running">${pad(i + 1)} ${esc(s.title)}</p>
-        <div class="detail">
-          <div class="detail-main">${pic(p.cover, "", 1400)}</div>
-          <div class="detail-text">
-            <h3 class="display"${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</h3>
-            <p class="label">${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</p>
-            ${(p.description || []).map((t) => `<p>${esc(t)}</p>`).join("")}
-          </div>
-        </div>`));
-      const [wide, ...rest] = extra;
-      pages.push(page(`
-        <p class="label running">${pad(i + 1)} ${esc(s.title)} — ${esc(p.title)}</p>
-        <div class="spread">
-          <figure class="spread-wide">${pic(wide.image, "", 1400)}<figcaption class="label">${esc(wide.caption || "")}</figcaption></figure>
-          <div class="spread-row">${rest.map((g) => `<figure>${pic(g.image, "", 800)}<figcaption class="label">${esc(g.caption || "")}</figcaption></figure>`).join("")}</div>
-        </div>`));
-      return;
-    }
     pages.push(page(`
-      <p class="label running">${pad(i + 1)} ${esc(s.title)}</p>
-      <div class="detail">
-        <div class="detail-main">${pic(p.cover, "", 1400)}</div>
-        <div class="detail-text">
+      <div class="one">
+        <div class="one-img">${pic(p.cover, "", 1400)}</div>
+        <div class="one-text">
+          <p class="label">${pad(i + 1)} ${esc(s.title)}</p>
           <h3 class="display"${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</h3>
           <p class="label">${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</p>
-          ${p.summary ? `<p class="summary">${esc(p.summary)}</p>` : ""}
           ${(p.description || []).map((t) => `<p>${esc(t)}</p>`).join("")}
-          ${extra.length ? `<div class="extras">${extra.map((g) => `<figure>${pic(g.image, "", 1000)}<figcaption class="label">${g.kind ? `<b>${g.kind}</b> · ` : ""}${esc(g.caption || "")}</figcaption></figure>`).join("")}</div>` : ""}
         </div>
       </div>`));
   });
@@ -196,6 +153,19 @@ dl { margin: 4mm 0 5mm; display: grid; gap: 1.4mm; } dl div { display: grid; gri
 .spread-row { display: flex; gap: 5mm; justify-content: space-between; align-items: flex-end; flex: 1; min-height: 0; }
 .spread-row figure { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; }
 .spread-row img { width: 100%; height: 78mm; object-fit: cover; }
+/* section intro */
+.intro-page { height: 100%; display: flex; flex-direction: column; justify-content: center; max-width: 175mm; }
+.intro-page .num { font-size: 30mm; opacity: .2; }
+.intro-page h2 { font-size: 22mm; margin: 2mm 0 3mm; }
+.intro-page .sub { font-size: 12pt; opacity: .7; }
+.intro-text { columns: 2; column-gap: 10mm; font-size: 9.6pt; }
+/* one work per page */
+.one { display: grid; grid-template-columns: 1fr 70mm; gap: 12mm; height: 100%; align-items: center; }
+.one-img { height: 100%; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.one-img img { width: auto; height: auto; max-width: 100%; max-height: 178mm; }
+.one-text { align-self: end; font-size: 9pt; padding-bottom: 2mm; }
+.one-text h3 { font-size: 11mm; margin: 2mm 0 2mm; }
+.one-text .label + .display + .label { margin-bottom: 4mm; }
 /* closing */
 .closing { position: relative; height: 100%; }
 .closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
