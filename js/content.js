@@ -88,6 +88,7 @@
       paragraphs: [
         "My practice often combines these approaches through mixed media, photography, collage and illustration.",
         "Inspired by nature, personal experiences and everyday moments, I use art as a way to explore and express my inner world. I am drawn to experimentation, discovering new ways of working and translating emotions and observations into visual forms.",
+        "I travel a lot and love exploring the world. I started by travelling around my own country, meeting the clients I was working with and taking inspiration from the world around me, and I keep doing so as I continue to study and express myself.",
       ],
       whatIDo: ["Watercolour", "Linocut & printmaking", "Poster design", "Illustration & character design", "Logo, packaging & merchandise", "Mixed media, photography & collage"],
       clients: ["Puldin", "Red Beard Studio", "Robin"],
@@ -118,7 +119,7 @@
       id: "i-want", year: 2025, title: "I Want — Linocut Prints", reveal: "print", accent: "#4f6f99",
       meta: [["Medium", "Linocut / Printmaking"], ["Exhibition", "UNIART, New Bulgarian University"]],
       text: [
-        "A two-part linocut series created for and shown in the UNIART exhibition at New Bulgarian University, under the theme I Want.",
+        "A two-part linocut series, Безпределност (Boundlessness) and Прибой (Surf), created for and shown in the UNIART exhibition at New Bulgarian University, under the theme I Want.",
         "The works explore desire, longing and the search for a sense of belonging. Through the imagery of a boat lost at sea and a fender drifting alongside it, I wanted to express a particular emotional state — one of uncertainty, displacement and introspection.",
         "Both objects exist within the same vast, unfamiliar sea, appearing lost while simultaneously navigating their own way towards self-discovery. The two prints reflect a personal longing for a state of being that is difficult to define, somewhere between feeling lost and finding oneself.",
       ],
@@ -133,7 +134,15 @@
       ],
     },
     {
-      id: "puldin", year: 2024, title: "Puldin — Дивите козлета", subtitle: "Logo Design & T-Shirt Illustrations", reveal: "sketch", accent: "#5f7040",
+      id: "sketches", year: 2025, title: "Sketches & Studies", subtitle: "Dry chalk and pencil", reveal: "sketch", accent: "#5a5552",
+      meta: [["Medium", "Dry black chalk / Pencil"], ["Size", "50 × 70 cm"], ["Context", "Life drawing"]],
+      text: [
+        "A series of life drawings made in dry black chalk and pencil, each completed in twenty minutes to an hour, directly from the model.",
+        "Working with dry chalk, I studied both the material itself and drawing from life, aiming to capture each model with their own character.",
+      ],
+    },
+    {
+      id: "puldin", year: 2024, title: "Puldin — Дивите козлета", subtitle: "The Wild Goats · Logo Design & T-Shirt Illustrations", reveal: "sketch", accent: "#5f7040",
       meta: [["Client", "Puldin — Дивите козлета (The Wild Goats)"], ["Project", "Brand Identity / Logo Design / T-shirt Illustration"]],
       text: [
         "Three projects for Puldin — Дивите козлета (The Wild Goats), a tourism company inspired by the spirit of adventure, nature and mountain exploration: the company’s logo, a commemorative T-shirt for its marathon event, and a T-shirt for its trip to the Pyrenees.",
@@ -166,14 +175,6 @@
         "The project combines illustration and seasonal storytelling to create a distinctive visual presentation for a traditional product, connecting cultural heritage with contemporary brand design.",
       ],
     },
-    {
-      id: "sketches", year: 2025, title: "Sketches & Studies", subtitle: "Dry chalk and pencil", reveal: "sketch", accent: "#5a5552",
-      meta: [["Medium", "Dry black chalk / Pencil"], ["Size", "50 × 70 cm"], ["Context", "Life drawing"]],
-      text: [
-        "A series of life drawings made in dry black chalk and pencil, each completed in twenty minutes to an hour, directly from the model.",
-        "Working with dry chalk, I studied both the material itself and drawing from life, aiming to capture each model with their own character.",
-      ],
-    },
   ];
 
   /* WORKS — each belongs to a series. span = columns out of 12 on desktop; start = optional start column.
@@ -197,12 +198,12 @@
     /* 02 I Want — Linocut Prints */
     {
       slug: "bezpredelnost", series: "i-want", span: 7, lang: "bg", title: "Безпределност", category: "Linocut",
-      summary: "The boat, lost at sea.",
+      summary: "Boundlessness: the boat, lost at sea.",
       cover: img("bezpredelnost.jpg", 1556, 1190, "Two-colour linocut print titled Bezpredelnost"),
     },
     {
       slug: "priboy", series: "i-want", span: 5, lang: "bg", title: "Прибой", category: "Linocut",
-      summary: "The fender, drifting alongside it.",
+      summary: "Surf: the fender, drifting alongside it.",
       cover: img("priboy.jpg", 1141, 1552, "Two-colour linocut of a rope knot and netted fender over water"),
     },
 
@@ -236,12 +237,17 @@
       cover: img("hold.jpg", 1200, 1600, "Black and white poster of a hand gripping rock above pine trees"),
     },
 
-    /* 04 Puldin — Дивите козлета */
+    /* 04 Sketches & Studies */
+    { slug: "study-seated", series: "sketches", span: 4, title: "Seated Figure", category: "Dry chalk", cover: img("study-seated.jpg", 1114, 1600, "Dry chalk drawing of a woman sitting on a chair in an off-the-shoulder top, looking into the distance") },
+    { slug: "study-pencil", series: "sketches", span: 4, title: "Lost in Thought", category: "Pencil", cover: img("study-pencil.jpg", 999, 1600, "Pencil sketch of an older woman sitting forward on a stool, her chin resting on her hand") },
+    { slug: "study-portrait", series: "sketches", span: 4, title: "Portrait Study", category: "Dry chalk", cover: img("study-portrait.jpg", 1194, 1600, "Dry chalk portrait of a young woman with a ponytail, leaning on her arm and looking to the side") },
+
+    /* 05 Puldin — Дивите козлета */
     {
       slug: "puldin-10th-season", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "T-shirt design",
-      summary: "Ten seasons in love with the mountains.",
+      summary: "Дивите козлета, The Wild Goats: ten seasons in love with the mountains.",
       description: [
-        "This T-shirt was created to celebrate the brand’s tenth season. Designed for both children and adults, it reflects the organisation’s inclusive spirit and its invitation to people of all ages to explore nature and challenge themselves.",
+        "This T-shirt for Дивите козлета (The Wild Goats) was created to celebrate the brand’s tenth season. Designed for both children and adults, it reflects the organisation’s inclusive spirit and its invitation to people of all ages to explore nature and challenge themselves.",
         "The illustration captures the energy of the participants, children and adults alike, who become like wild goats as they climb and connect with nature. I turned that spirit into a playful, wearable graphic.",
       ],
       cover: img("divite-kozleta.jpg", 1336, 1280, "Three cartoon goats with backpacks in front of pine trees, with the text Divite kozleta, 10 seasons in love with the mountains"),
@@ -249,7 +255,7 @@
     {
       slug: "wild-goats-logo", series: "puldin", span: 4, lang: "bg", title: "Дивите козлета", category: "Logo",
       description: [
-        "A logo for the event itself, which was later adapted into a medal design awarded to participants after certain trips.",
+        "A logo for the event itself, Дивите козлета (The Wild Goats), which was later adapted into a medal design awarded to participants after certain trips.",
         "For the logo, I combined the silhouette of a goat with a mountain-inspired form, reflecting the company’s connection to the mountains and its adventurous character.",
       ],
       cover: img("wild-goats.jpg", 846, 891, "Line-drawn logo of a goat silhouette inside a mountain shape"),
@@ -273,16 +279,16 @@
       },
     },
 
-    /* 05 Red Beard Studio — Brand Logo */
+    /* 06 Red Beard Studio — Brand Logo */
     { slug: "robin-logo-bird", series: "robin-identity", span: 6, start: 4, title: "Robin — Bird Mark", category: "Logo", cover: img("rb-studio.jpg", 1600, 1600, "Logo drawn as a single brush-stroke bird with the word studio") },
 
-    /* 06 Leak — Character Illustrations */
+    /* 07 Leak — Character Illustrations */
     { slug: "robin-characters-front", series: "robin-characters", span: 6, title: "The Baristas — Front", category: "Character design", cover: img("winter-walk-1.jpg", 1445, 1117, "Line illustration of two girls walking, one carrying a cup, one a film reel, front view") },
     { slug: "robin-characters-side", series: "robin-characters", span: 6, title: "The Baristas — Side", category: "Character design", cover: img("winter-walk-2.jpg", 1480, 1141, "Line illustration of the same two girls walking, side view") },
     { slug: "moka-break", series: "robin-characters", span: 6, title: "Moka Break", category: "Character design", cover: img("moka-break.jpg", 1600, 1200, "Line illustration of a man with a moka pot coffee maker"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
     { slug: "slow-morning", series: "robin-characters", span: 6, title: "Slow Morning", category: "Character design", cover: img("slow-morning.jpg", 1600, 1200, "Line illustration of a man lying down pouring coffee"), gallery: [{ image: img("leak-tshirts.jpg", 1536, 1024, "Three cream T-shirts printed with the line illustrations: the man lying down pouring coffee, the man crouching with a moka pot, and the man hugging a moka pot"), size: "full", caption: "How the characters would look on the staff T-shirts" }] },
 
-    /* 07 Robin — Easter Kozunak Packaging */
+    /* 08 Robin — Easter Kozunak Packaging */
     {
       slug: "robin-kozunak", series: "robin-kozunak", span: 12, title: "Kozunak Packaging", category: "Packaging illustration",
       cover: img("robin-lab.jpg", 1600, 428, "Two bakers carrying kozunak bread with a robin, and a scribbled robin with the line better when shared"),
@@ -296,9 +302,5 @@
       ],
     },
 
-    /* 08 Sketches & Studies */
-    { slug: "study-seated", series: "sketches", span: 4, title: "Seated Figure", category: "Dry chalk", cover: img("study-seated.jpg", 1116, 1600, "Dry chalk drawing of a woman sitting on a chair in an off-the-shoulder top, looking into the distance") },
-    { slug: "study-pencil", series: "sketches", span: 4, title: "Lost in Thought", category: "Pencil", cover: img("study-pencil.jpg", 920, 1325, "Pencil sketch of an older woman sitting forward on a stool, her chin resting on her hand") },
-    { slug: "study-portrait", series: "sketches", span: 4, title: "Portrait Study", category: "Dry chalk", cover: img("study-portrait.jpg", 1200, 1600, "Dry chalk portrait of a young woman with a ponytail, leaning on her arm and looking to the side") },
   ];
 })();
