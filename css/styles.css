@@ -849,7 +849,10 @@ img.is-error { visibility: hidden; }
 .p-series { padding-top: 0; }
 /* sketchbook pages shown small, under the text */
 .p-process { padding-top: 0; }
-.p-process-grid { display: flex; flex-wrap: wrap; gap: 20px var(--gutter); align-items: flex-end; }
+.p-process > .label { grid-column: 1 / -1; }
+.p-process .p-overview-body { grid-column: 1 / -1; }
+.p-process-grid { display: flex; flex-wrap: wrap; gap: 20px var(--gutter); align-items: flex-end; justify-content: center; }
+.p-process-item figcaption { text-align: center; }
 .p-process-item { margin: 0; flex: 0 1 auto; }
 .p-process-media { height: clamp(200px, 24vw, 340px); max-width: 100%; border-radius: 6px; overflow: hidden; background: #f3f1ec; }
 .p-process-media img { width: 100%; height: 100%; object-fit: contain; }
