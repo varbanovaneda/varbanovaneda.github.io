@@ -107,7 +107,7 @@
   window.SERIES = [
     {
       id: "watercolour", year: 2025, title: "Watercolour Studies", reveal: "wash", accent: "#c9577a",
-      meta: [["Medium", "Watercolour"]],
+      meta: [["Medium", "Watercolour"], ["Size", "A4 (21 × 29.7 cm)"]],
       text: [
         "A series of watercolour studies exploring the qualities and expressive possibilities of the medium. Developed during a dedicated study session, the collection features a variety of still-life compositions and landscapes, each painted exclusively with a square brush.",
         "By limiting my tools and techniques, I focused on texture, colour interaction, layering and the spontaneous nature of watercolour. The square brush became the defining element of the process. Its distinct marks and shapes created their own visual language.",
@@ -168,7 +168,7 @@
     },
     {
       id: "sketches", year: 2025, title: "Sketches & Studies", subtitle: "Dry chalk and pencil", reveal: "sketch", accent: "#5a5552",
-      meta: [["Medium", "Dry black chalk / Pencil"], ["Context", "Life drawing"]],
+      meta: [["Medium", "Dry black chalk / Pencil"], ["Size", "50 × 70 cm"], ["Context", "Life drawing"]],
       text: [
         "A series of life drawings made in dry black chalk and pencil, each completed in twenty minutes to an hour, directly from the model.",
         "Working with dry chalk, I studied both the material itself and drawing from life, aiming to capture each model with their own character.",
