@@ -53,31 +53,29 @@ pages.push(page(`
     </div>
   </div>`));
 
-/* each section: a text page, then every work once, one per page */
+/* each section on one page: its text and all its works (the watercolours take two pages) */
 SERIES.forEach((s, i) => {
   const works = P.filter((p) => p.series === s.id);
   const meta = [...(s.meta || []), ...(s.year ? [["Year", s.year]] : [])];
+  const card = (p) => `<figure>${pic(p.cover, "", 1000)}<figcaption><b${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</b><span>${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</span></figcaption></figure>`;
+  const grid = (list) => {
+    const cols = list.length <= 3 ? list.length : 2, rows = Math.ceil(list.length / cols);
+    return `<div class="works" style="grid-template-columns:repeat(${cols},1fr);grid-template-rows:repeat(${rows},1fr)">${list.map(card).join("")}</div>`;
+  };
+  const split = works.length > 4 ? 3 : works.length;
   pages.push(page(`
-    <div class="intro-page">
-      <span class="num display">${pad(i + 1)}</span>
-      <h2 class="display">${esc(s.title)}</h2>
-      ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
-      <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-      <div class="intro-text">${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
-      ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}</div>
+    <div class="section">
+      <div class="section-text">
+        <span class="num display">${pad(i + 1)}</span>
+        <h2 class="display">${esc(s.title)}</h2>
+        ${s.subtitle ? `<p class="sub">${esc(s.subtitle)}</p>` : ""}
+        <dl>${meta.map(([k, v]) => `<div><dt class="label">${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+        ${(s.text || []).map((t) => `<p>${esc(t)}</p>`).join("")}
+        ${s.link ? `<p class="link"><a href="${esc(s.link.url)}">${esc(s.link.label)} ↗</a></p>` : ""}
+      </div>
+      ${grid(works.slice(0, split))}
     </div>`));
-  works.forEach((p) => {
-    pages.push(page(`
-      <div class="one">
-        <div class="one-img">${pic(p.cover, "", 1400)}</div>
-        <div class="one-text">
-          <p class="label">${pad(i + 1)} ${esc(s.title)}</p>
-          <h3 class="display"${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</h3>
-          <p class="label">${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</p>
-          ${(p.description || []).map((t) => `<p>${esc(t)}</p>`).join("")}
-        </div>
-      </div>`));
-  });
+  if (works.length > split) pages.push(page(`<p class="label running">${pad(i + 1)} ${esc(s.title)}</p><div class="section only">${grid(works.slice(split))}</div>`));
 });
 
 /* closing */
@@ -85,7 +83,6 @@ pages.push(page(`
   <div class="closing">
     ${S.creditImage ? pic(S.creditImage, "", 1400) : ""}
     <div class="closing-text">
-      <h2 class="display">${S.cta.lines.map(esc).join("<br>")}</h2>
       <p>${esc(S.email)}<br>${esc(S.phone.label)}<br>${S.socials.map((s) => esc(s.handle || s.label)).join(" · ")}<br>varbanovaneda.github.io</p>
       <p class="hand">${esc(S.credit || "")}</p>
     </div>
@@ -166,6 +163,19 @@ dl { margin: 4mm 0 5mm; display: grid; gap: 1.4mm; } dl div { display: grid; gri
 .one-text { align-self: end; font-size: 9pt; padding-bottom: 2mm; }
 .one-text h3 { font-size: 11mm; margin: 2mm 0 2mm; }
 .one-text .label + .display + .label { margin-bottom: 4mm; }
+/* section pages */
+.section { display: grid; grid-template-columns: 78mm 1fr; gap: 10mm; height: 100%; }
+.section.only { grid-template-columns: 1fr; height: calc(100% - 4mm); margin-top: 4mm; }
+.section-text { font-size: 8.2pt; overflow: hidden; }
+.section-text .num { font-size: 18mm; opacity: .2; display: block; }
+.section-text h2 { font-size: 11mm; margin: 1mm 0 2mm; }
+.section-text .sub { opacity: .7; font-size: 9.5pt; }
+.works { display: grid; gap: 7mm; min-height: 0; height: 100%; }
+.works figure { margin: 0; display: flex; flex-direction: column; min-height: 0; }
+.works img { flex: 1; min-height: 0; width: 100%; height: 100%; object-fit: contain; object-position: left bottom; border-radius: 0; }
+.works figcaption { margin-top: 2mm; display: flex; justify-content: space-between; gap: 3mm; font-size: 7pt; }
+.works figcaption b { font-family: "Fira Sans Extra Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 10pt; line-height: 1; }
+.works figcaption span { opacity: .55; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
 /* closing */
 .closing { position: relative; height: 100%; }
 .closing > img { width: 100%; height: 100%; object-fit: cover; border-radius: 3mm; }
