@@ -20,6 +20,17 @@ const file = (im, want = 1400) => {
   }
   return "file://" + path.join(ROOT, im.src);
 };
+/* print copies: each image resampled to the size it is shown at (150 dpi), cached in tools/.pdf-cache */
+const { execFileSync } = require("child_process");
+const CACHE = path.join(ROOT, "tools/.pdf-cache");
+fs.mkdirSync(CACHE, { recursive: true });
+const DPI = 150;
+const printed = (im, mm) => {
+  const px = Math.min(im.width, Math.ceil((mm / 25.4) * DPI));
+  const out = path.join(CACHE, `${path.basename(im.src).replace(/\.[^.]+$/, "")}-${px}.jpg`);
+  if (!fs.existsSync(out)) execFileSync("python3", [path.join(__dirname, "pdf-image.py"), path.join(ROOT, im.src), out, String(px)]);
+  return "file://" + out;
+};
 const yearOf = (p) => p.year || (SERIES.find((s) => s.id === p.series) || {}).year || "";
 
 /* page geometry (mm) */
@@ -55,7 +66,7 @@ function rowsOf(list, W, H) {
   const { rows, hs } = options.map((o) => fit(o, W, H)).sort((a, b) => b.area - a.area)[0];
   return rows.map((r, i) => `<div class="row">${r.map((p) => {
     const h = hs[i], w = ar(p) * h;
-    return `<figure style="width:${w.toFixed(1)}mm"><img src="${file(p.cover, w > 120 ? 1400 : 1000)}" style="width:${w.toFixed(1)}mm;height:${h.toFixed(1)}mm" alt="${esc(p.cover.alt || "")}">
+    return `<figure style="width:${w.toFixed(1)}mm"><img src="${printed(p.cover, w)}" style="width:${w.toFixed(1)}mm;height:${h.toFixed(1)}mm" alt="${esc(p.cover.alt || "")}">
       <figcaption><b${p.lang ? ` lang="${p.lang}"` : ""}>${esc(p.title)}</b><span>${esc([p.category, yearOf(p)].filter(Boolean).join(" · "))}</span></figcaption></figure>`;
   }).join("")}</div>`).join("");
 }
@@ -118,7 +129,7 @@ SERIES.forEach((s, i) => {
 /* closing */
 pages.push(page(`
   <div class="closing">
-    ${S.creditImage ? `<img src="${file(S.creditImage, 1400)}" alt="${esc(S.creditImage.alt || "")}">` : ""}
+    ${S.creditImage ? `<img src="${printed(S.creditImage, CW)}" alt="${esc(S.creditImage.alt || "")}">` : ""}
     <div class="closing-text">
       <p class="hand">For the full experience of my portfolio, open the website: it is part of my creative work, designed and built by me :)</p>
       <p class="site"><a href="https://varbanovaneda.github.io/">varbanovaneda.github.io</a></p>
